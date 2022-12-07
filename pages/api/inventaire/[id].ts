@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { Inventaire } from '/interfaces'
+import type { Inventaire } from '../../../interfaces'
 
 export default function userHandler(req: NextApiRequest, res: NextApiResponse) {
   const inventaires: Inventaire[] = [{ id: "50", title:"T50", contentDeMoi:"50" }, { id: "51", title:"T51", contentDeMoi:"51"  }, { id: "52", title:"T52", contentDeMoi:"52"  }]
@@ -18,7 +18,7 @@ export default function userHandler(req: NextApiRequest, res: NextApiResponse) {
       break
     case 'PUT':
       // Update or create data in your database
-      res.status(200).json({ id, title: name || `User ${id}` })
+      res.status(200).json({ id, title: "name" || `User ${id}` })
       break
     default:
       res.setHeader('Allow', ['GET', 'PUT'])

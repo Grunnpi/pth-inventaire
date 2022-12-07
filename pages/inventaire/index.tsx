@@ -1,11 +1,11 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import Layout, { siteTitle } from '/components/layout';
+import Layout, { siteTitle } from '../../components/layout';
 import utilStyles from '/styles/utils.module.css';
 
 
 import useSwr from 'swr'
-import type { Inventaire } from '/interfaces'
+import type { Inventaire } from '../../interfaces'
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
@@ -16,7 +16,7 @@ export default function Home() {
   if (!allPostsData) return <div>Chargement en cours...</div>
 
   return (
-    <Layout>
+    <Layout home="false">
       <Head>
         <title>{siteTitle}</title>
       </Head>

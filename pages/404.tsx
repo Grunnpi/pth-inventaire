@@ -1,10 +1,10 @@
-import Layout from '/components/layout'
+import Layout from '../components/layout'
 import Head from 'next/head';
 import utilStyles from '/styles/utils.module.css'
 
 export default function Custom404() {
   return (
-    <Layout>
+    <Layout home="false">
      <Head>
         <title>404</title>
       </Head>

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { Inventaire } from '/interfaces'
+import type { Inventaire } from '../../interfaces'
 import { google } from 'googleapis';
 
 // Fake users data
@@ -17,7 +17,7 @@ export  default async function handler(_req: NextApiRequest, res: NextApiRespons
       const target = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
       const jwt = new google.auth.JWT(
             process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-            null,
+            undefined,
             (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
             target
           );
@@ -31,10 +31,12 @@ export  default async function handler(_req: NextApiRequest, res: NextApiRespons
       });
 
      // var data = [{ question: "what is your name?", answer: "Ben", topic: "names" }, { question: "what is your name?", answer: "Ben", topic: "names" }, { question: "What is dog's name?", answer: "Snugglets", topic: "names" }, { question: "What is your brother's age?", answer: 55, topic: "ages" }],
-      var inventaires = [];
-      response.data.values.map((oneRow) => (
-          inventaires.push({id: oneRow[2], title: oneRow[1], contentDeMoi: oneRow[7]})
-      ))
+      var inventaires: Inventaire[] = [];
+      if (response.data.values) {
+          response.data.values.map((oneRow) => (
+              inventaires.push({id: oneRow[2], title: oneRow[1], contentDeMoi: oneRow[7]})
+          ))
+      }
       console.log(inventaires);
 
       res.status(200).json(inventaires)
