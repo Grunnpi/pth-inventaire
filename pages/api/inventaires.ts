@@ -3,7 +3,7 @@ import type { Inventaire } from '../../interfaces'
 import { google } from 'googleapis';
 
 import { unstable_getServerSession } from "next-auth/next"
-import { authOptions } from "../api/auth/[...nextauth]"
+import authOptions from "../api/auth/[...nextauth]"
 
 // Fake users data
 const inventaires: Inventaire[] = [{ id: "50", title:"T50", contentDeMoi:"50" }, { id: "51", title:"T51", contentDeMoi:"51"  }, { id: "52", title:"T52", contentDeMoi:"52"  }]
