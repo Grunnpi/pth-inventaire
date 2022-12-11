@@ -1,18 +1,30 @@
 import Layout from '../../components/layout'
 import { getPostData } from '../../lib/posts';
 import Head from 'next/head';
+import Image from 'next/image'
 import utilStyles from '../../styles/utils.module.css'
 
 import useSwr from 'swr'
 import type { Inventaire } from '../../interfaces'
+import { useRouter } from 'next/router';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const Post2 = () => {
+  const router = useRouter()
+  const { id } = router.query
+
+  return <p>Post: {id}</p>
+}
+
+const Post = () => {
+  const fetcher = (url: string) => fetch(url).then((res) => res.json())
+
+   const router = useRouter()
+   const { id } = router.query
 
 
-export default function Post({ id } : {id: string}) {
-  const { data: post, error } = useSwr<Inventaire>('/api/inventaire/' + id, fetcher)
+  const { data: post, error } = useSwr<Inventaire>(`/api/inventaire/${id}`, fetcher)
 
-  if (error) return <div>Erreur de chargement un objet</div>
+  if (error) return <div>Erreur de chargement un truc</div>
   if (!post) return <div>Chargement objet en cours...</div>
 
   return (
@@ -23,9 +35,23 @@ export default function Post({ id } : {id: string}) {
     <article>
       <h1 className={utilStyles.headingXl}>{post.title}</h1>
       <div className={utilStyles.lightText}>
-        {post.contentDeMoi}
+        {post.contentDeMoi}<br/>
+        <Image
+              src={post.contentDeMoi}
+              alt="Image de la chose"
+              width={200}
+              height={150}
+              sizes="100vw"
+              style={{
+                      width: '100%',
+                      height: 'auto',
+                    }}
+            />
+        <br/>
       </div>
     </article>
     </Layout>
   )
 }
+
+export default Post

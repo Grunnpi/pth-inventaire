@@ -23,18 +23,20 @@ export  default async function handler(_req: NextApiRequest, res: NextApiRespons
           );
       const sheets = google.sheets({ version: 'v4', auth: jwt });
 
-      const range = `Inventaire!A301:H309`;
+      const range = `Matériel!A301:H309`;
 
+      const valueRenderOption = 'UNFORMATTED_VALUE'
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId: process.env.SHEET_ID,
         range,
+        valueRenderOption
       });
 
      // var data = [{ question: "what is your name?", answer: "Ben", topic: "names" }, { question: "what is your name?", answer: "Ben", topic: "names" }, { question: "What is dog's name?", answer: "Snugglets", topic: "names" }, { question: "What is your brother's age?", answer: 55, topic: "ages" }],
       var inventaires: Inventaire[] = [];
       if (response.data.values) {
           response.data.values.map((oneRow) => (
-              inventaires.push({id: oneRow[2], title: oneRow[1], contentDeMoi: oneRow[7]})
+              inventaires.push({id: oneRow[0], title: oneRow[2], contentDeMoi: oneRow[3]})
           ))
       }
       console.log(inventaires);

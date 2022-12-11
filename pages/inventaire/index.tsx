@@ -36,7 +36,7 @@ export default function Home() {
             <Link href={`/posts/${inventaire.id}`}>{inventaire.title}</Link>
             <br/>
             <small className={utilStyles.lightText}>
-                {inventaire.id}
+                {inventaire.contentDeMoi}
             </small>
             </li>
           ))}

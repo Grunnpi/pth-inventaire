@@ -4,10 +4,28 @@ import styles from './layout.module.css';
 import utilStyles from '/styles/utils.module.css';
 import Link from 'next/link';
 
+import { useSession, signIn, signOut } from "next-auth/react"
+
 const name = 'PTH Inventaire';
 export const siteTitle = 'PTH Inv';
 
 export default function Layout({ children, home }) {
+  const { data: session } = useSession()
+  if (session) {
+      return (
+        <>
+          Signed in as {session.user.email} <br />
+          <button onClick={() => signOut()}>Sign out</button>
+        </>
+      )
+    }
+    return (
+      <>
+        Not signed in <br />
+        <button onClick={() => signIn()}>Sign in</button>
+      </>
+    )
+
   return (
     <div className={styles.container}>
       <Head>
