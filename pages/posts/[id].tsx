@@ -1,5 +1,4 @@
 import Layout from '../../components/layout'
-import { getPostData } from '../../lib/posts';
 import Head from 'next/head';
 import Image from 'next/image'
 import utilStyles from '../../styles/utils.module.css'

@@ -51,13 +51,15 @@ export default async function userHandler(req: NextApiRequest, res: NextApiRespo
         valueRenderOption
       });
 
-      var inventaire: Inventaire;
+      var inventaire: Inventaire = {id:"", title:"", contentDeMoi:""};
       if (response.data.values) {
           response.data.values.map((oneRow) => (
               inventaire = {id: oneRow[0], title: oneRow[2], contentDeMoi: oneRow[5]})
           )
+          res.status(200).json(inventaire)
       }
-      console.log(inventaire);
-      res.status(200).json(inventaire)
+      else {
+          res.status(404).json('')
+      }
   }
 }

@@ -7,6 +7,8 @@ import { useSession, signIn, signOut } from "next-auth/react"
 export default function Home() {
 const { data: session } = useSession()
   if (session) {
+      const user_image : string = session.user ? session.user.image ? session.user.image : "" : ""
+
       return (
           <div className={styles.container}>
             <Head>
@@ -60,7 +62,7 @@ const { data: session } = useSession()
 
             <footer className={styles.footer}>
                 <span className={styles.logo}>
-                      <Image src={session.user.image} alt="Avatar logo" width={16} height={16} />
+                      <Image src={user_image} alt="Avatar logo" width={16} height={16} />
                 </span>
                 Utilisateur {session.user.name} ({session.user.email})
                 <button onClick={() => signOut()}>Sign out</button>{' '}
