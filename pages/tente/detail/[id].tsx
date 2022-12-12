@@ -4,7 +4,7 @@ import Image from 'next/image'
 import utilStyles from '../../../styles/utils.module.css'
 
 import useSwr from 'swr'
-import type { Inventaire } from '../../interfaces'
+import type { Inventaire } from '../../../interfaces'
 import { useRouter } from 'next/router';
 
 const Post2 = () => {
