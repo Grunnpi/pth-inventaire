@@ -5,6 +5,7 @@ import utilStyles from '/styles/utils.module.css';
 import Link from 'next/link';
 
 import { useSession, signIn, signOut } from "next-auth/react"
+//import my_useSession from "/lib/my-session2"
 
 const name = 'PTH Inventaire';
 export const siteTitle = 'PTH Inv';
@@ -14,7 +15,7 @@ export default function Layout({ children, home }) {
   if (!session) {
       return (
         <>
-          Not signed in <br />
+          Not signed ing <br />
           <button onClick={() => signIn()}>Sign in</button>
         </>
       )

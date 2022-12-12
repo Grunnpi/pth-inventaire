@@ -3,12 +3,13 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
 import { useSession, signIn, signOut } from "next-auth/react"
+//import my_useSession from "/lib/my-session2"
 
 export default function Home() {
-const { data: session } = useSession()
+  const { data: session } = useSession()
+  console.log("Home : session")
+  console.log(session)
   if (session) {
-      const user_image : string = session.user ? session.user.image ? session.user.image : "" : ""
-
       return (
           <div className={styles.container}>
             <Head>
@@ -62,7 +63,7 @@ const { data: session } = useSession()
 
             <footer className={styles.footer}>
                 <span className={styles.logo}>
-                      <Image src={user_image} alt="Avatar logo" width={16} height={16} />
+                      <Image src={session.user.image} alt="Avatar logo" width={16} height={16} />
                 </span>
                 Utilisateur {session.user.name} ({session.user.email})
                 <button onClick={() => signOut()}>Sign out</button>{' '}
@@ -85,6 +86,7 @@ const { data: session } = useSession()
       <>
         Not signed in <br />
         <button onClick={() => signIn()}>Sign in</button>
+        <button onClick={() => signOut()}>Sign out</button>{' '}
       </>
     )
 

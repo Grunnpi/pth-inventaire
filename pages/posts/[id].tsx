@@ -40,6 +40,7 @@ const Post = () => {
               alt="Image de la chose"
               width={200}
               height={150}
+              unoptimized={process.env.imageForLocal}
               sizes="100vw"
               style={{
                       width: '100%',
