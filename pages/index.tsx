@@ -20,40 +20,31 @@ export default function Home() {
 
             <main className={styles.main}>
               <h1 className={styles.title}>
-                SGDF, <a href="https://sites.sgdf.fr/pays-thionvillois/">Pays Thionvillois</a>
+                SGDF, Pays Thionvillois
               </h1>
 
               <p className={styles.description}>
-                Gestion du matériel{' '}
-                <code className={styles.code}>pages/index.tsx</code>
+                <code className={styles.code}>🤝 inventaire à jour 😘</code>
               </p>
 
               <div className={styles.grid}>
-                <a href="/inventaire" className={styles.card}>
-                  <h2>Tentes &rarr;</h2>
-                  <p>Liste des tentes du groupe et de leur détails</p>
-                </a>
-
-                <a href="https://nextjs.org/learn" className={styles.card}>
-                  <h2>Matos &rarr;</h2>
-                  <p>Les gamelles, le froissartage, etc !</p>
-                </a>
-
-                <a
-                  href="https://github.com/vercel/next.js/tree/canary/examples"
-                  className={styles.card}
-                >
-                  <h2>Evenement &rarr;</h2>
+                <a href="/evenement" className={styles.card}>
+                  <h2>📆 Evenement &rarr;</h2>
                   <p>Gestion d'un week-end ou un evenement</p>
                 </a>
 
-                <a
-                  href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.card}
-                >
-                  <h2>Autre &rarr;</h2>
+                <a href="/tente" className={styles.card}>
+                  <h2>🏕️ Tentes &rarr;</h2>
+                  <p>Liste des tentes du groupe et de leur détails</p>
+                </a>
+
+                <a href="/matos" className={styles.card}>
+                  <h2>🍳 Matos &rarr;</h2>
+                  <p>Les gamelles, le froissartage, etc !</p>
+                </a>
+
+                <a href="/autre" className={styles.card}>
+                  <h2>❓ Autre &rarr;</h2>
                   <p>
                     Puisqu'il faut bien mettre le reste quelque part.
                   </p>
@@ -62,23 +53,12 @@ export default function Home() {
             </main>
 
             <footer className={styles.footer}>
-                <span className={styles.logo}>
-                      <Image src={session.user.image} alt="Avatar logo" width={16} height={16} />
-                </span>
-                Utilisateur {session.user.name} ({session.user.email})
-                <button onClick={() => signOut()}>Sign out</button>{' '}
+                  <span className={styles.logo}>
+                        <Image src={session.user.image} alt="Avatar logo" width={16} height={16} />
 
-              <a
-                href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Powered by{' '}
-                <span className={styles.logo}>
-                  <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-                </span>
-              </a>
-            </footer>
+                  </span>
+                  <a href="mailto:{session.user.email}">{session.user.name}</a> <button onClick={() => signOut()}>Sign out</button>{' '}
+              </footer>
           </div>
         )
     }
@@ -89,6 +69,4 @@ export default function Home() {
         <button onClick={() => signOut()}>Sign out</button>{' '}
       </>
     )
-
-
 }

@@ -61,7 +61,9 @@ export default NextAuth({
             return null;
           },
         }),
-  ],
+  ]
+
+  /*,
     callbacks: {
       async jwt({ token, user, account }) {
         if (account && user) {
@@ -90,4 +92,5 @@ export default NextAuth({
     },
     // Enable debug messages in the console if you are having problems
     debug: process.env.NODE_ENV === 'development',
+    */
 })

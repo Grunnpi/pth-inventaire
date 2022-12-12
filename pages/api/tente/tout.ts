@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { Inventaire } from '../../interfaces'
+import type { Inventaire } from '../../../interfaces'
 import { google } from 'googleapis';
 
 import { unstable_getServerSession } from "next-auth/next"
-import authOptions from "../api/auth/[...nextauth]"
+import authOptions from "../../api/auth/[...nextauth]"
 
 // Fake users data
 const inventaires: Inventaire[] = [{ id: "50", title:"T50", contentDeMoi:"http://localhost:3000/images/profile.jpg" }, { id: "51", title:"T51", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }, { id: "52", title:"T52", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }]

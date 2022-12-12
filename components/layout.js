@@ -42,10 +42,10 @@ export default function Layout({ children, home }) {
               <>
                 <Image
                   priority
-                  src="/images/profile.jpg"
+                  src="/images/SGDF.png"
                   className={utilStyles.borderCircle}
-                  height={144}
-                  width={144}
+                  width={150}
+                  height={80}
                   alt=""
                 />
                 <h1 className={utilStyles.heading2Xl}><Link href="/">{name}</Link></h1>
@@ -55,10 +55,10 @@ export default function Layout({ children, home }) {
                 <Link href="/">
                   <Image
                     priority
-                    src="/images/profile.jpg"
+                    src="/images/SGDF.png"
                     className={utilStyles.borderCircle}
-                    height={108}
-                    width={108}
+                    height={30}
+                    width={30}
                     alt=""
                   />
                 </Link>
@@ -71,16 +71,18 @@ export default function Layout({ children, home }) {
             )}
           </header>
           <main>{children}</main>
-        <>
-          Signed in as {session.user.email} <br />
-          <button onClick={() => signOut()}>Sign out</button>
-        </>
 
           {!home && (
             <div className={styles.backToHome}>
               <Link href="/">← Menu</Link>
             </div>
           )}
+          <footer className={styles.footer}>
+              <span className={styles.logo}>
+                    <Image src={session.user.image} alt="Avatar logo" width={16} height={16} />
+              </span>
+              <a href="mailto:{session.user.email}">{session.user.name}</a> <button onClick={() => signOut()}>Sign out</button>{' '}
+          </footer>
         </div>
       );
     }

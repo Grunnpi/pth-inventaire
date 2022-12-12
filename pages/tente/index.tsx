@@ -10,7 +10,7 @@ import type { Inventaire } from '../../interfaces'
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export default function Home() {
-  const { data: allPostsData, error } = useSwr<Inventaire[]>('/api/inventaires', fetcher)
+  const { data: allPostsData, error } = useSwr<Inventaire[]>('/api/tente/tout', fetcher)
 
   if (error) return <div>Erreur de chargement inventaire</div>
   if (!allPostsData) return <div>Chargement en cours...</div>
@@ -33,7 +33,7 @@ export default function Home() {
 
           {allPostsData.map((inventaire) => (
             <li className={utilStyles.listItem} key={inventaire.id}>
-            <Link href={`/posts/${inventaire.id}`}>{inventaire.title}</Link>
+            <Link href={`/tente/detail/${inventaire.id}`}>{inventaire.title}</Link>
             <br/>
             <small className={utilStyles.lightText}>
                 {inventaire.contentDeMoi}

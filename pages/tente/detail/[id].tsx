@@ -1,7 +1,7 @@
-import Layout from '../../components/layout'
+import Layout from '../../../components/layout'
 import Head from 'next/head';
 import Image from 'next/image'
-import utilStyles from '../../styles/utils.module.css'
+import utilStyles from '../../../styles/utils.module.css'
 
 import useSwr from 'swr'
 import type { Inventaire } from '../../interfaces'
@@ -21,7 +21,7 @@ const Post = () => {
    const { id } = router.query
 
 
-  const { data: post, error } = useSwr<Inventaire>(`/api/inventaire/${id}`, fetcher)
+  const { data: post, error } = useSwr<Inventaire>(`/api/tente/${id}`, fetcher)
 
   if (error) return <div>Erreur de chargement un truc</div>
   if (!post) return <div>Chargement objet en cours...</div>
