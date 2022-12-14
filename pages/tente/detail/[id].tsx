@@ -2,6 +2,7 @@ import Layout from '../../../components/layout'
 import Head from 'next/head';
 import Image from 'next/image'
 import utilStyles from '../../../styles/utils.module.css'
+import Container from '../../../components/Container';
 
 import useSwr from 'swr'
 import type { Inventaire } from '../../../interfaces'
@@ -27,6 +28,7 @@ const Post = () => {
   if (!post) return <div>Chargement objet en cours...</div>
 
   return (
+  <Container>
     <Layout home="false">
      <Head>
         <title>{post.title}</title>
@@ -51,6 +53,7 @@ const Post = () => {
       </div>
     </article>
     </Layout>
+    </Container>
   )
 }
 

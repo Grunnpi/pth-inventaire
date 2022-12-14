@@ -1,21 +1,14 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react';
+import { ThemeProvider } from 'next-themes';
 
-export default function App({ Component, pageProps }: AppProps) {
-        /*
-         const mySession = {
-               expires: new Date(Date.now() + 2 * 86400).toISOString(),
-               user: { email: "a", name: "Delta", image: "" },
-             }
-        pageProps.session=mySession
-        */
+export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
-      <SessionProvider
-        //session={mySession}
-        session={pageProps.session}
-      >
-        <Component {...pageProps} />
+      <SessionProvider session={session}>
+        <ThemeProvider attribute="class">
+            <Component {...pageProps} />
+        </ThemeProvider>
       </SessionProvider>
     )
 }

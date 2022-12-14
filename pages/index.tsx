@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import Container from '../components/Container';
 
 import { useSession, signIn, signOut } from "next-auth/react"
 //import my_useSession from "/lib/my-session2"
@@ -11,6 +12,7 @@ export default function Home() {
   console.log(session)
   if (session) {
       return (
+        <Container>
           <div className={styles.container}>
             <Head>
               <title>PTH Inventaire</title>
@@ -60,6 +62,7 @@ export default function Home() {
                   <a href="mailto:{session.user.email}">{session.user.name}</a> <button onClick={() => signOut()}>Sign out</button>{' '}
               </footer>
           </div>
+          </Container>
         )
     }
     return (
