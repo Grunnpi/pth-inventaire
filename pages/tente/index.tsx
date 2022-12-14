@@ -38,7 +38,8 @@ export default function Home() {
                   <BlogPostCard
                     title={inventaire.contentDeMoi}
                     slug={inventaire.id}
-                    gradient="from-[#D8B4FE] to-[#818CF8]"
+                    //gradient="from-[#D8B4FE] to-[#818CF8]"
+                    gradient="from-[#0000FF] to-[#6EE7B7]"
                   />
               ))}
               </div>

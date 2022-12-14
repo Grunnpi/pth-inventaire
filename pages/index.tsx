@@ -4,7 +4,6 @@ import styles from '../styles/Home.module.css'
 import Container from '../components/Container';
 
 import { useSession, signIn, signOut } from "next-auth/react"
-//import my_useSession from "/lib/my-session2"
 
 export default function Home() {
   const { data: session } = useSession()
@@ -26,7 +25,7 @@ export default function Home() {
               </h1>
 
               <p className={styles.description}>
-                <code className={styles.code}>🤝 inventaire à jour 😘</code>
+                🤝 inventaire à jour 😘
               </p>
 
               <div className={styles.grid}>
@@ -69,7 +68,6 @@ export default function Home() {
       <>
         Not signed in <br />
         <button onClick={() => signIn()}>Sign in</button>
-        <button onClick={() => signOut()}>Sign out</button>{' '}
       </>
     )
 }
