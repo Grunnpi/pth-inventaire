@@ -1,7 +1,3 @@
-import Layout from '../components/layout'
-import Head from 'next/head';
-import utilStyles from '/styles/utils.module.css'
-
 import Link from 'next/link';
 import Container from '../components/Container';
 
@@ -14,10 +10,7 @@ export default function NotFound() {
             404 – Page même pas là
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
-            Why show a generic 404 when I can make it sound mysterious? It seems
-            you've found something that used to exist, or you spelled something
-            wrong. I'm guessing you spelled something wrong. Can you double check
-            that URL?
+            Tu es perdu ? Retour sur la page "base" et continu ton chemin
           </p>
           <Link
             href="/"
@@ -27,18 +20,5 @@ export default function NotFound() {
           </Link>
         </div>
       </Container>
-/*
-    <Layout home="false">
-     <Head>
-        <title>404</title>
-      </Head>
-    <article>
-      <h1 className={utilStyles.headingXl}>404 - même pas là</h1>
-      <div className={utilStyles.lightText}>
-        plouf
-      </div>
-    </article>
-    </Layout>
-    */
   )
 }

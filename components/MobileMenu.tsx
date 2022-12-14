@@ -89,14 +89,6 @@ export default function MobileMenu() {
               Autre
             </Link>
           </li>
-          <li
-            className="border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-sm font-semibold"
-            style={{ transitionDelay: '300ms' }}
-          >
-            <Link href="/signOut" className="flex w-auto pb-4">
-              Profile
-            </Link>
-          </li>
         </ul>
       )}
     </>

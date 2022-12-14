@@ -38,7 +38,7 @@ export default function Container(props) {
   const router = useRouter();
   const meta = {
     title: 'PTH Inventaire',
-    description: `Front-end developer, JavaScript enthusiast, and course creator.`,
+    description: ``,
     image: 'https://leerob.io/static/images/lee-banner.png',
     type: 'website',
     ...customMeta

@@ -1,13 +1,13 @@
-import Head from 'next/head';
 import Link from 'next/link';
-import Layout, { siteTitle } from '../../components/layout';
+
 import Container from '../../components/Container';
 import BlogPostCard from '../../components/BlogPostCard';
 
-import utilStyles from '/styles/utils.module.css';
-
 import useSwr from 'swr'
 import type { Inventaire } from '../../interfaces'
+
+import PacmanLoader from "react-spinners/PacmanLoader";
+
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
@@ -15,38 +15,53 @@ export default function Home() {
   const { data: allPostsData, error } = useSwr<Inventaire[]>('/api/tente/tout', fetcher)
 
   if (error) return <div>Erreur de chargement inventaire</div>
-  if (!allPostsData) return <div>Chargement en cours...</div>
-
-  return (
-    <Container>
-        <Layout home="false">
-          <Head>
-            <title>{siteTitle}</title>
-          </Head>
-          <section className={utilStyles.headingMd}>
-            <p>Pour gestion de l'inventaire du groupe</p>
-            <p>
-              (qui fait ça ? Voir ici la page {' '}
-              <a href="/about">à propos</a>.)
-            </p>
-          </section>
-
-          <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
-
-              <div className="flex gap-1 flex-col md:flex-col">
-              {allPostsData.map((inventaire) => (
-                  <BlogPostCard
-                    title={inventaire.contentDeMoi}
-                    slug={inventaire.id}
-                    //gradient="from-[#D8B4FE] to-[#818CF8]"
-                    gradient="from-[#0000FF] to-[#6EE7B7]"
-                  />
-              ))}
+  if (!allPostsData) {
+      return (
+        <Container
+            title="Tentes"
+            description="La gestion des tentes..."
+          >
+            <div className="flex flex-col items-start justify-center max-w-2xl mx-auto mb-16">
+              <h1 className="mb-4 text-3xl font-bold tracking-tight text-black md:text-5xl dark:text-white">
+                Tentes
+              </h1>
+              <p className="mb-4 text-gray-600 dark:text-gray-400">
+                Toutes les tentes du groupe. On peut filter par type (P8, P6, Marabout, ...)
+                et on va bien voir quelles autres gadgets on peut ajouter ici
+              </p>
+              <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
+                  <PacmanLoader color="hsla(216, 67%, 53%, 1)" />
               </div>
-
-
-          </section>
-        </Layout>
-    </Container>
-  );
+            </div>
+        </Container>
+      );
+  }
+  else {
+      return (
+        <Container
+            title="Tentes"
+            description="La gestion des tentes..."
+          >
+            <div className="flex flex-col items-start justify-center max-w-2xl mx-auto mb-16">
+              <h1 className="mb-4 text-3xl font-bold tracking-tight text-black md:text-5xl dark:text-white">
+                Tentes
+              </h1>
+              <p className="mb-4 text-gray-600 dark:text-gray-400">
+                Toutes les tentes du groupe. On peut filter par type (P8, P6, Marabout, ...)
+                et on va bien voir quelles autres gadgets on peut ajouter ici
+              </p>
+              <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
+                  {allPostsData.map((inventaire) => (
+                      <BlogPostCard
+                        title={inventaire.contentDeMoi}
+                        slug={inventaire.id}
+                        //gradient="from-[#D8B4FE] to-[#818CF8]"
+                        gradient="from-[#0000FF] to-[#6EE7B7]"
+                      />
+                  ))}
+              </div>
+            </div>
+        </Container>
+      );
+  }
 }
