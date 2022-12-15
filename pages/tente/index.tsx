@@ -12,7 +12,7 @@ import PacmanLoader from "react-spinners/PacmanLoader";
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export default function Home() {
-  const { data: allPostsData, error } = useSwr<Inventaire[]>('/api/tente/tout', fetcher)
+  const { data: allPostsData, error } = useSwr<Inventaire[]>('/api/gsheet/tente/liste', fetcher)
 
   if (error) return <div>Erreur de chargement inventaire</div>
   if (!allPostsData) {
