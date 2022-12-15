@@ -5,13 +5,13 @@ import cn from 'classnames';
 import fetcher from '../lib/fetcher';
 import { Views } from '../lib/types';
 
-export default function BlogPostCard({ title, slug, gradient }) {
+export default function BlogPostCard({ title, slug, gradient, the_type }) {
   const { data } = useSWR<Views>(`/api/views/${slug}`, fetcher);
   const views = data?.total;
 
   return (
     <Link
-      href={`/tente/detail/${slug}`}
+      href={`/${the_type}/detail/${slug}`}
       className={cn(
         'transform hover:scale-[1.01] transition-all',
         'rounded-xl w-full md:w-1/1 bg-gradient-to-r p-1',

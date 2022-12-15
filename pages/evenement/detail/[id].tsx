@@ -21,7 +21,7 @@ const Post = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json())
   const router = useRouter()
   const { id } = router.query
-  const { data: post, error } = useSwr<Inventaire>(`/api/gsheet/tente/detail/${id}`, fetcher)
+  const { data: post, error } = useSwr<Inventaire>(`/api/gsheet/evenement/detail/${id}`, fetcher)
   if (error) return <div>Erreur de chargement un truc</div>
   if (!post) {
     return (<Container
