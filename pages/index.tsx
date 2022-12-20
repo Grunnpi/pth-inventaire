@@ -62,7 +62,7 @@ export default function Home() {
                 </a>
 
                 <a href="/autre" className={styles.card}>
-                  <h2>❓ Autre &rarr;</h2>
+                  <h2>❓🌂 Autre &rarr;</h2>
                   <p>
                     Puisqu'il faut bien mettre le reste quelque part.
                   </p>

@@ -57,7 +57,6 @@ const Post = () => {
                 <p className="text-gray-700 dark:text-gray-300">
                   {post.contentDeMoi}
                 </p>
-
                 <div className="md:w-48 mt-2 sm:mt-0">
                   <Zoom
                       alt={post.title}
