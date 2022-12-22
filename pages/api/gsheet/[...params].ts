@@ -49,8 +49,32 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         return res.status(500).json({ message: "Need POST for update" })
       } else {
         console.log("Youpi on fait un UPDATE")
-        const inventaire:Inventaire = req.body
-        console.log(inventaire)
+        const evenement:Evenement = req.body
+        console.log(evenement)
+
+        const range ="Evenement"
+        const data = [
+            {
+              values: [["3", evenement.titre, evenement.type, evenement.unite, evenement.status]],
+              range: `'${range}'!A3:E3`
+            }
+            ]
+
+        const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
+        const jwt = new google.auth.JWT(
+              process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+              undefined,
+              (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+              accessTypeForGSheet
+            );
+        const myGoogleSheet = google.sheets({ version: 'v4', auth: jwt });
+         const response = await myGoogleSheet.spreadsheets.values.batchUpdate({
+          spreadsheetId: process.env.SHEET_ID,
+          requestBody: {
+            valueInputOption: "USER_ENTERED"
+            , data
+            }
+         });
 
         return res.status(200).json({ message: the_type + " update ok" })
       }

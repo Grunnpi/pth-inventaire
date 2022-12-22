@@ -13,19 +13,34 @@ import React, { useState, Component } from "react";
 
 
 const Unites = [
-  { value: "GP", label: "Groupe" },
-  { value: "FA", label: "Farfadets" },
-  { value: "LJ", label: "Louveteaux/Jeannettes" },
-  { value: "SG", label: "Scouts/Guides" },
-  { value: "PC", label: "Pionniers/Caravelles" },
+  { value: "GP", label: "🟣 Groupe" },
+  { value: "FA", label: "🟢 Farfadets" },
+  { value: "LJ", label: "🟠 Louveteaux/Jeannettes" },
+  { value: "SG", label: "🔵 Scouts/Guides" },
+  { value: "PC", label: "🔴 Pionniers/Caravelles" },
 ];
 
 const Types = [
-  { value: "Week-end", label: "Week-End" },
-  { value: "Réunion", label: "Réunion" },
-  { value: "Journée", label: "Journée" },
-  { value: "Camp", label: "Camp" },
+  { value: "Week-End", label: "⛺ Week-End" },
+  { value: "Réunion", label: "👍 Réunion" },
+  { value: "Journée", label: "🕺 Journée" },
+  { value: "Camp", label: "🏕️ Camp" },
 ];
+
+const Status = [
+  { value: "Préparation", label: "Préparation" },
+  { value: "Départ", label: "Départ" },
+  { value: "Retour", label: "Retour" },
+  { value: "Fini", label: "Fini" },
+];
+
+function search(valueKey, myArray){
+    for (let i=0; i < myArray.length; i++) {
+        if (myArray[i].value === valueKey) {
+            return myArray[i];
+        }
+    }
+}
 
 import Zoom from "next-image-zoom";
 
@@ -48,7 +63,6 @@ const Post = () => {
 
   if (error) return <div>Erreur de chargement un truc</div>
 
-
   const [selectedUnitee, setSelectedUnitee] = useState(null);
   const setHandleUnitee = (e) => {
     setSelectedUnitee(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
@@ -59,6 +73,16 @@ const Post = () => {
     setSelectedType(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
   };
 
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const setHandleStatus = (e) => {
+    setSelectedStatus(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
+  };
+
+  var defaultUnite
+  var defaultType
+  var defaultStatus
+
+
   // Handles the submit event on form submit.
   const handleSubmit = async (event) => {
     // Stop the form from submitting and refreshing the page.
@@ -68,9 +92,9 @@ const Post = () => {
     const data = {
       id: event.target.id.value,
       titre: event.target.titre.value,
-      type: selectedType,
-      unite: selectedUnitee,
-      status: event.target.status.value,
+      type: selectedType ? selectedType : defaultType.value,
+      unite: selectedUnitee ? selectedUnitee : defaultUnite.value,
+      status: selectedStatus ? selectedStatus : defaultStatus.value,
     }
 
     // Send the data to the server in JSON format.
@@ -100,7 +124,6 @@ const Post = () => {
     alert(`Retour de la chose : ${result.message}`)
   }
 
-
   if (!unEvenement) {
     return (<Container
                  title={`???`}
@@ -122,6 +145,10 @@ const Post = () => {
     </Container> )
   }
   else {
+       defaultUnite = search(unEvenement.unite, Unites);
+       defaultType = search(unEvenement.type, Types);
+       defaultStatus = search(unEvenement.status, Status);
+
       return (<Container
           title={`${superTitre}`}
           description={`${superDescription}`}
@@ -133,28 +160,27 @@ const Post = () => {
                   {unEvenement.titre}
                 </h1>
                 <p className="text-gray-700 dark:text-gray-300">
-                  <form className="flex flex-col" onSubmit={handleSubmit}>
+                  <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
+                    <label htmlFor="titre">ID</label>
+                    <input type="text" id="id" name="id" defaultValue={unEvenement.id}  />
+
                     <label htmlFor="titre">Titre</label>
                     <input type="text" id="titre" name="titre" defaultValue={unEvenement.titre} required />
 
                     <label htmlFor="type">Type</label>
-                    <input type="text" id="type" name="type" defaultValue={unEvenement.type} required />
-
-                    <label htmlFor="type">Type</label>
                     <div>
-                      <Select id="x" options={Types} onChange={setHandleType}  />
+                      <Select defaultValue={defaultType} options={Types} onChange={setHandleType}  />
                     </div>
 
                     <label htmlFor="unite">Unité</label>
                     <div>
-                      <Select id="xx" options={Unites} onChange={setHandleUnitee}  />
+                      <Select defaultValue={defaultUnite} options={Unites} onChange={setHandleUnitee}  />
                     </div>
 
-
                     <label htmlFor="status">Status</label>
-                    <input type="text" id="status" name="status" defaultValue={unEvenement.status} required />
-
-                    <div>{selectedUnitee} // {selectedType}</div>
+                    <div>
+                      <Select defaultValue={defaultStatus} options={Status} onChange={setHandleStatus}  />
+                    </div>
 
                     <button type="submit">Submit</button>
                   </form>

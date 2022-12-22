@@ -4,7 +4,7 @@ import Container from '../../components/Container';
 import BlogPostCard from '../../components/BlogPostCard';
 
 import useSwr from 'swr'
-import type { Inventaire } from '../../interfaces'
+import type { Evenement } from '../../interfaces'
 
 import PacmanLoader from "react-spinners/PacmanLoader";
 
@@ -12,7 +12,7 @@ import PacmanLoader from "react-spinners/PacmanLoader";
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export default function Home() {
-  const { data: allPostsData, error } = useSwr<Inventaire[]>('/api/gsheet/evenement/liste', fetcher)
+  const { data: allPostsData, error } = useSwr<Evenement[]>('/api/gsheet/evenement/liste', fetcher)
 
   if (error) return <div>Erreur de chargement inventaire</div>
   if (!allPostsData) {
@@ -51,10 +51,10 @@ export default function Home() {
                 et on va bien voir quelles autres gadgets on peut ajouter ici
               </p>
               <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
-                  {allPostsData.map((inventaire) => (
+                  {allPostsData.map((evenement) => (
                       <BlogPostCard
-                        title={inventaire.contentDeMoi}
-                        slug={inventaire.id}
+                        title={evenement.titre}
+                        slug={evenement.id}
                         //gradient="from-[#D8B4FE] to-[#818CF8]"
                         gradient="from-[#0000FF] to-[#6EE7B7]"
                         the_type="evenement"
