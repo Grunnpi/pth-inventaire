@@ -11,6 +11,9 @@ import { useRouter } from 'next/router';
 import Select from "react-select";
 import React, { useState, Component } from "react";
 
+import { useSession, signIn, signOut } from "next-auth/react"
+
+import { useEvenementContext } from "../../../context/evenement";
 
 const Unites = [
   { value: "GP", label: "🟣 Groupe" },
@@ -57,9 +60,12 @@ const Post2 = () => {
 const Post = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
+  const { data: session } = useSession()
   const router = useRouter()
   const { id } = router.query
   const { data: unEvenement, error } = useSwr<Evenement>(`/api/gsheet/evenement/detail/${id}`, fetcher)
+
+  const [evenement, setEvenement] = useEvenementContext();
 
   if (error) return <div>Erreur de chargement un truc</div>
 
@@ -81,6 +87,19 @@ const Post = () => {
   var defaultUnite
   var defaultType
   var defaultStatus
+
+  const handleChooseEvenement = async (session, unEvenement:Evenement) => {
+      // Stop the form from submitting and refreshing the page.
+
+      if (session) {
+        alert(`DANS LA SESSION : ${session.user.mystuff}`)
+        setEvenement(unEvenement)
+      }
+      else {
+        alert(`PAS DE SESSION : ${unEvenement.titre}`)
+      }
+
+    }
 
 
   // Handles the submit event on form submit.
@@ -149,6 +168,8 @@ const Post = () => {
        defaultType = search(unEvenement.type, Types);
        defaultStatus = search(unEvenement.status, Status);
 
+
+
       return (<Container
           title={`${superTitre}`}
           description={`${superDescription}`}
@@ -184,6 +205,9 @@ const Post = () => {
 
                     <button type="submit">Submit</button>
                   </form>
+                  <span className="text-gray-500 hover:text-gray-600 transition">
+                    <button onClick={() => handleChooseEvenement(session, unEvenement)}>⏏️</button>{' '}
+                  </span>
                 </p>
 
                 <div className="md:w-48 mt-2 sm:mt-0">

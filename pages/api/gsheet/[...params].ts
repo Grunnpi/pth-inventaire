@@ -12,23 +12,25 @@ import type { Inventaire, Evenement } from '../../../interfaces'
 export  default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await unstable_getServerSession(req, res, authOptions)
 
+  // map les param
+  const {
+    query: { params },
+    body: { body },
+    method,
+  } = req
+
+  if (session && !params) return res.status(500).json({ message: "Invalid parameters" })
+  if (session && params.length < 2) return res.status(500).json({ message: "Invalid parameters count" })
+
+  var the_type = params[0]
+  var the_sous_type = params[1]
+
   // basic error handling
-  if (!session) return res.status(401).json({ message: "Unauthorized stuff" })
+  if (!session) {
+    if (the_type !== "utilisateur") return res.status(401).json({ message: "Unauthorized stuff" })
+  }
 
-  if (session) {
-    // map les param
-    const {
-      query: { params },
-      body: { body },
-      method,
-    } = req
-
-    console.log(params.length)
-    if (!params) return res.status(500).json({ message: "Invalid parameters" })
-    if (params.length < 2) return res.status(500).json({ message: "Invalid parameters count" })
-
-    var the_type = params[0]
-    var the_sous_type = params[1]
+  if (true) {
 
     var the_detail_id:string = ""
     var isDetailAction = false
@@ -95,7 +97,14 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         if (isDetailAction) {
           gsheet_range = `Evenement!A${the_detail_id}:E${the_detail_id}`
         } else {
-          gsheet_range = `Evenement!A:E`;
+          gsheet_range = `Evenement!A2:E`;
+        }
+        break
+      case "utilisateur":
+        if (isDetailAction) {
+          gsheet_range = `Utilisateur!A${the_detail_id}:E${the_detail_id}`
+        } else {
+          gsheet_range = `Utilisateur!A2:E`;
         }
         break
       default:
@@ -162,6 +171,22 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
                     evenements.push({id: oneRowDetail[0], titre: oneRowDetail[1], type: oneRowDetail[2], unite: oneRowDetail[3], status: oneRowDetail[4]})
               ))
               return res.status(200).json(evenements)
+            }
+            break
+          case "utilisateur":
+            var utilisateur: Utilisateur = {id:"", nom:"", mot_de_passe:"", role:""};
+            var utilisateurs: Utilisateur[] = [];
+            if (isDetailAction) {
+              response.data.values.map((oneRowDetail) => (
+                    utilisateur = {id: oneRowDetail[0], nom: oneRowDetail[1], mot_de_passe: oneRowDetail[2], role: oneRowDetail[3]})
+              )
+              return res.status(200).json(utilisateur)
+            }
+            else {
+              response.data.values.map((oneRow) => (
+                    utilisateurs.push({id: oneRowDetail[0], nom: oneRowDetail[2], mot_de_passe: oneRowDetail[3], role: oneRowDetail[4]})
+              ))
+              return res.status(200).json(utilisateurs)
             }
             break
         }

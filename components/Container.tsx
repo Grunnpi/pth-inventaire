@@ -8,6 +8,8 @@ import cn from 'classnames';
 import Footer from '../components/Footer';
 import MobileMenu from '../components/MobileMenu';
 
+import { useEvenementContext } from "../context/evenement";
+
 function NavItem({ href, text }) {
   const router = useRouter();
   const isActive = router.asPath === href;
@@ -30,6 +32,7 @@ function NavItem({ href, text }) {
 export default function Container(props) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
+  const [evenement, setEvenement] = useEvenementContext();
 
   // After mounting, we have access to the theme
   useEffect(() => setMounted(true), []);
@@ -78,6 +81,7 @@ export default function Container(props) {
             <NavItem href="/tente" text="Tentes" />
             <NavItem href="/matos" text="Matos" />
             <NavItem href="/autre" text="Autre" />
+            <NavItem href={evenement ? "/evenement/detail/" + evenement.id : "/"}  text={evenement ? evenement.titre : "X"} />
           </div>
           <button
             aria-label="Toggle Dark Mode"
