@@ -5,7 +5,7 @@ import { google } from 'googleapis';
 import { unstable_getServerSession } from "next-auth/next"
 import authOptions from "../../api/auth/[...nextauth]"
 
-import type { Inventaire, Evenement } from '../../../interfaces'
+import type { Inventaire, Evenement, Utilisateur } from '../../../interfaces'
 
 // Fake users data
 
@@ -27,7 +27,12 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
 
   // basic error handling
   if (!session) {
-    if (the_type !== "utilisateur") return res.status(401).json({ message: "Unauthorized stuff" })
+    if (the_type !== "utilisateur") {
+      return res.status(401).json({ message: "Unauthorized stuff" })
+    }
+    else {
+      console.log("gsheet fetch user / no session")
+    }
   }
 
   if (true) {
@@ -114,13 +119,38 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
 
     // simulation si pas accès internet ou firewall
     if ( process.env.MY_ENV === "local" ) {
-      const inventaires: Inventaire[] = [{ id: "50", title:"T50", contentDeMoi:"http://localhost:3000/images/profile.jpg" }, { id: "51", title:"T51", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }, { id: "52", title:"T52", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }]
-      if (isDetailAction) {
-        return res.status(200).json(inventaires[0])
+      console.log("ici Paris")
+      /*
+      switch (the_type) {
+        case "tente":
+            const inventaires: Inventaire[] = [{ id: "50", title:"T50", contentDeMoi:"http://localhost:3000/images/profile.jpg" }, { id: "51", title:"T51", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }, { id: "52", title:"T52", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }]
+            if (isDetailAction) {
+              return res.status(200).json(inventaires[0])
+            }
+            else {
+              return res.status(200).json(inventaires)
+            }
+          break
+        case "evenement":
+            const evenement: Evenement[] = [{ id: "50", title:"T50", contentDeMoi:"http://localhost:3000/images/profile.jpg" }, { id: "51", title:"T51", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }, { id: "52", title:"T52", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }]
+            if (isDetailAction) {
+              return res.status(200).json(evenement[0])
+            }
+            else {
+              return res.status(200).json(evenement)
+            }
+          break
+        case "utilisateur":
+            const utilisateurs: Utilisateur[] = [{ id: "2", nom:"Utilisateur2", mot_de_passe:"xxx", role:"" }]
+            if (isDetailAction) {
+              return res.status(200).json(utilisateurs[0])
+            }
+            else {
+              return res.status(200).json(utilisateurs)
+            }
+          break
       }
-      else {
-        return res.status(200).json(inventaires)
-      }
+      */
     }
     else {
       const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
@@ -183,8 +213,8 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
               return res.status(200).json(utilisateur)
             }
             else {
-              response.data.values.map((oneRow) => (
-                    utilisateurs.push({id: oneRowDetail[0], nom: oneRowDetail[2], mot_de_passe: oneRowDetail[3], role: oneRowDetail[4]})
+              response.data.values.map((oneRowDetail) => (
+                    utilisateurs.push({id: oneRowDetail[0], nom: oneRowDetail[1], mot_de_passe: oneRowDetail[2], role: oneRowDetail[3]})
               ))
               return res.status(200).json(utilisateurs)
             }
