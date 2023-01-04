@@ -142,14 +142,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
             // The spreadsheet to apply the updates to.
             spreadsheetId: process.env.SHEET_ID,  // TODO: Update placeholder value.
 
-            resource: {
-              // A list of updates to apply to the spreadsheet.
-              // Requests will be applied in the order they are specified.
-              // If any request is not valid, no requests will be applied.
-              requests: batchUpdateRequest,  // TODO: Update placeholder value.
-
-              // TODO: Add desired properties to the request body.
-            },
+            resource: batchUpdateRequest,
 
             //auth: authClient,
           };
