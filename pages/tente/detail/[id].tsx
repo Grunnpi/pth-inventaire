@@ -4,25 +4,85 @@ import Container from '../../../components/Container';
 
 import PacmanLoader from "react-spinners/PacmanLoader";
 
+import { useSession, signIn, signOut } from "next-auth/react"
+
+
 import useSwr from 'swr'
 import type { Inventaire } from '../../../interfaces'
 import { useRouter } from 'next/router';
 
 import Zoom from "next-image-zoom";
 
-const Post2 = () => {
-  const router = useRouter()
-  const { id } = router.query
+import AlertConfirm, { Button } from 'react-alert-confirm';
+import "react-alert-confirm/lib/style.css";
 
-  return <p>Post: {id}</p>
-}
+import { useState } from "react";
 
 const Post = () => {
+  const { data: session } = useSession()
+
   const fetcher = (url: string) => fetch(url).then((res) => res.json())
   const router = useRouter()
   const { id } = router.query
   const { data: post, error } = useSwr<Inventaire>(`/api/gsheet/tente/detail/${id}`, fetcher)
   if (error) return <div>Erreur de chargement un truc</div>
+
+  const [url, setUrl] = useState("");
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    const file = {
+      preview: URL.createObjectURL(e.target.files[0]),
+      data: e.target.files[0],
+    };
+    setFile(file);
+  };
+
+  const handleImage = async (event) => {
+
+    event.preventDefault()
+
+    const [action] = await AlertConfirm({title:'Sûr de vouloir supprimer cet évenement ?!', desc:"un si bel évenement...."});
+    if (action) {
+      // Stop the form from submitting and refreshing the page.
+
+      // Get data from the form.
+      const data = { file: file.data}
+
+      // Send the data to the server in JSON format.
+      const JSONdata = JSON.stringify(data)
+
+      // API endpoint where we send form data.
+      const endpoint = '/api/gsheet/image/test'
+
+      // Form the request for sending data to the server.
+      const options = {
+        // The method is POST because we are sending data.
+        method: 'POST',
+        // Tell the server we're sending JSON.
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Body of the request is the JSON data we created above.
+        body: JSONdata,
+      }
+
+      // Send the form data to our forms API on Vercel and get a response.
+      const response = await fetch(endpoint, options)
+
+      // Get the response data from server as JSON.
+      // If server returns the name submitted, that means the form works.
+      const result = await response.json()
+      alert(`Mise à jour : ${result.message}`)
+
+    }
+  }
+
+
+
+
+
+
   if (!post) {
     return (<Container
                  title={`???`}
@@ -57,6 +117,13 @@ const Post = () => {
                 <p className="text-gray-700 dark:text-gray-300">
                   {post.contentDeMoi}
                 </p>
+
+                <form onSubmit={handleImage}>
+                  <input type="file" name="files" onChange={handleFileChange}></input>
+                  <button type="submit">🗑 Images ?️</button>
+                </form>
+
+
                 <div className="md:w-48 mt-2 sm:mt-0">
                   <Zoom
                       alt={post.title}

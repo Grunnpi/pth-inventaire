@@ -5,6 +5,8 @@ import { google } from 'googleapis';
 import { unstable_getServerSession } from "next-auth/next"
 import authOptions from "../../api/auth/[...nextauth]"
 
+const fs = require('fs');
+
 import type { Inventaire, Evenement, Utilisateur } from '../../../interfaces'
 
 // Fake users data
@@ -48,6 +50,85 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         isDetailAction = true
       }
     }
+
+    if ( the_type === "image" ) {
+      console.log("test les trucs avec les images")
+      console.log(req.body.file)
+
+      const accessTypeForGSheet = ['https://www.googleapis.com/auth/drive.file',
+                                       'https://www.googleapis.com/auth/drive',
+                                       'https://www.googleapis.com/auth/drive.file',
+                                       'https://www.googleapis.com/auth/drive.metadata'
+                                     ];
+      const jwt = new google.auth.JWT(
+            process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+            undefined,
+            (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+            accessTypeForGSheet
+          );
+
+        const drive = google.drive({ version: 'v3', auth: jwt });
+
+
+       const resList = await drive.files.list({
+          pageSize: 10,
+          fields: 'nextPageToken, files(id, name)',
+        });
+        const files = resList.data.files;
+        if (files.length === 0) {
+          console.log('No files found.');
+        } else {
+          console.log('Files:');
+          files.map((file) => {
+            console.log(`"${file.name}" (id==${file.id})`);
+
+
+            drive.permissions.create({
+              fileId: file.id,
+              moveToNewOwnersRoot: true
+            }, (err, retour) => {
+             if (err) {
+               // Handle error
+               console.error(err);
+             } else {
+               console.log('Ownership donné à SGDF ok : ', file.id);
+             }
+           });
+          });
+        }
+
+        const fileMetadata = {
+          'name': 'photo.jpg',
+          parents: ['1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv']
+        };
+
+        const filename = 'public/images/profile.jpg'
+        const media = {
+          mimeType: 'image/jpeg',
+          body: fs.createReadStream(filename)
+        };
+
+        const fileSize = fs.statSync(filename).size;
+      //return res.status(200).json({ message: "ouais, image quoi" })
+
+        console.log("prêt pour UPLOAD ici " + media.body.size)
+        const createRequest = {
+          resource: fileMetadata,
+          media: media,
+          fields: 'id'
+        }
+        drive.files.create(createRequest, (err, file) => {
+          if (err) {
+            // Handle error
+            console.error(err);
+          } else {
+            console.log('File uplodadedddd avec success et avec Id: ', file.data.id);
+          }
+        });
+
+      return res.status(200).json({ message: "ouais, image quoi" })
+    }
+
 
     if (isDetailAction && the_detail_id === "nouveau") {
       switch (the_type) {
