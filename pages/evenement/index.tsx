@@ -47,9 +47,13 @@ export default function Home() {
                 Evenement
               </h1>
               <p className="mb-4 text-gray-600 dark:text-gray-400">
-                Toutes les tentes du groupe. On peut filter par type (P8, P6, Marabout, ...)
-                et on va bien voir quelles autres gadgets on peut ajouter ici
+                Tous les evenements du groupe. (week-end, journée, camp, ...)
+                On crée un nouvel évenement pour planifier le matériel, puis le jour J on marque ce qui est pris
+                et enfin en fin, on marque ce qui revient et dans quel état
               </p>
+              <a href="/evenement/detail/nouveau" >
+                <p> 📆 Créer un nouvel Evenement &rarr;</p>
+              </a>
               <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
                   {allPostsData.map((evenement) => (
                       <BlogPostCard

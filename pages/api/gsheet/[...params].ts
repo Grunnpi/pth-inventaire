@@ -49,6 +49,23 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
+    if (isDetailAction && the_detail_id === "nouveau") {
+      switch (the_type) {
+        case "tente":
+          return res.status(200).json({ id: "nouveau" })
+          break
+        case "evenement":
+          return res.status(200).json({ id: "nouveau" })
+          break
+        case "utilisateur":
+          return res.status(200).json({ id: "nouveau" })
+          break
+        default:
+          console.log(the_type + " is invalid parameter")
+          return res.status(500).json({ message: the_type + " is invalid parameter" })
+      }
+    }
+
     if (the_sous_type === "update") {
       console.log("En mode UPDATE")
       console.log(method)
@@ -62,8 +79,8 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         const range ="Evenement"
         const data = [
             {
-              values: [["3", evenement.titre, evenement.type, evenement.unite, evenement.status]],
-              range: `'${range}'!A3:E3`
+              values: [["=LIGNE()", evenement.titre, evenement.type, evenement.unite, evenement.status]],
+              range: `'${range}'!A${evenement.id}:E${evenement.id}`
             }
             ]
 
@@ -87,6 +104,128 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
+    if (the_sous_type === "supprimer") {
+      console.log("En mode DELETE")
+      console.log(method)
+      if (method !== "POST") {
+        return res.status(500).json({ message: "Need POST for update" })
+      } else {
+        console.log("Youpi on fait un DELETE")
+        const evenement:Evenement = req.body
+        console.log(evenement)
+
+        var batchUpdateRequest = {
+          "requests": [
+            {
+              "deleteDimension": {
+                "range": {
+                  "sheetId": 1915467561,
+                  "dimension": "ROWS",
+                  "startIndex": parseInt(evenement.id) - 1,
+                  "endIndex": parseInt(evenement.id)
+                }
+              }
+            }
+          ]
+        }
+
+        const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
+        const jwt = new google.auth.JWT(
+              process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+              undefined,
+              (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+              accessTypeForGSheet
+            );
+        const myGoogleSheet = google.sheets({ version: 'v4', auth: jwt });
+
+        const request = {
+            // The spreadsheet to apply the updates to.
+            spreadsheetId: process.env.SHEET_ID,  // TODO: Update placeholder value.
+
+            resource: {
+              // A list of updates to apply to the spreadsheet.
+              // Requests will be applied in the order they are specified.
+              // If any request is not valid, no requests will be applied.
+              requests: batchUpdateRequest,  // TODO: Update placeholder value.
+
+              // TODO: Add desired properties to the request body.
+            },
+
+            //auth: authClient,
+          };
+
+        const response = await myGoogleSheet.spreadsheets.batchUpdate(request)
+
+          //spreadsheetId: process.env.SHEET_ID,
+        //  resource: batchUpdateRequest
+         /* resource:
+            requests: [
+                      {
+                        deleteDimension: {
+                          range: {
+                            sheetId: "1915467561",
+                            dimension: "ROWS",
+                            startIndex: parseInt(evenement.id) - 1,
+                            endIndex: evenement.id
+                          }
+                        }
+                      }
+                    ]
+          */
+
+
+        console.log(response)
+
+        return res.status(200).json({ message: the_type + " update ok" })
+      }
+    }
+
+
+    if (the_sous_type === "nouveau") {
+      console.log("En mode CREATE")
+      console.log(method)
+      if (method !== "POST") {
+        return res.status(500).json({ message: "Need POST for update" })
+      } else {
+        console.log("Youpi on fait un CREATE")
+        const evenement:Evenement = req.body
+        console.log(evenement)
+
+        const range ="Evenement"
+
+        const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
+        const jwt = new google.auth.JWT(
+              process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+              undefined,
+              (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+              accessTypeForGSheet
+            );
+        const myGoogleSheet = google.sheets({ version: 'v4', auth: jwt });
+        const request = {
+          spreadsheetId: process.env.SHEET_ID,
+          range: `Evenement`,
+          valueInputOption: "USER_ENTERED",
+          resource: {
+                      values: [["=LIGNE()", evenement.titre, evenement.type, evenement.unite, evenement.status]],
+                    },
+        }
+
+         const response = await myGoogleSheet.spreadsheets.values.append(request);
+
+        const valueRenderOption = 'UNFORMATTED_VALUE' // test pour voir si on arrive à récupérer l'url de l'image mais zob
+        const responseCount = await myGoogleSheet.spreadsheets.values.get({
+          spreadsheetId: process.env.SHEET_ID,
+          range: `Evenement`,
+          valueRenderOption
+        });
+       const row = responseCount.data.values.length;
+
+        return res.status(307).json({ message: the_type + " create ok" , newid:row})
+       //return res.redirect(307, `/evenement/detail/666`);
+
+//        return res.status(200).json({ message: the_type + " create ok" , newid:row})
+      }
+    }
 
     // gestion tentes uniquement
     var gsheet_range:string = ""

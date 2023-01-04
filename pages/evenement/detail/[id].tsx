@@ -15,6 +15,13 @@ import { useSession, signIn, signOut } from "next-auth/react"
 
 import { useEvenementContext } from "../../../context/evenement";
 
+import AlertConfirm, { Button } from 'react-alert-confirm';
+import "react-alert-confirm/lib/style.css";
+
+
+const superTitre = "Evenement"
+const superDescription = "Gestion d'un evenement"
+
 const Unites = [
   { value: "GP", label: "🟣 Groupe" },
   { value: "FA", label: "🟢 Farfadets" },
@@ -45,31 +52,14 @@ function search(valueKey, myArray){
     }
 }
 
-import Zoom from "next-image-zoom";
-
-const superTitre = "Evenement"
-const superDescription = "Gestion d'un evenement"
-
-const Post2 = () => {
-  const router = useRouter()
-  const { id } = router.query
-
-  return <p>Post: {id}</p>
-}
-
 const Post = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json())
-
   const { data: session } = useSession()
   const router = useRouter()
-  const { id } = router.query
-  const { data: unEvenement, error } = useSwr<Evenement>(`/api/gsheet/evenement/detail/${id}`, fetcher)
 
   const [evenement, setEvenement] = useEvenementContext();
-
-  if (error) return <div>Erreur de chargement un truc</div>
-
   const [selectedUnitee, setSelectedUnitee] = useState(null);
+
   const setHandleUnitee = (e) => {
     setSelectedUnitee(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
   };
@@ -88,17 +78,22 @@ const Post = () => {
   var defaultType
   var defaultStatus
 
+  const { id } = router.query
+  const { data: unEvenement, error } = useSwr<Evenement>(`/api/gsheet/evenement/detail/${id}`, fetcher)
+  if (error) {
+    return <div>Erreur de chargement un truc</div>
+  }
+
   const handleChooseEvenement = async (session, unEvenement:Evenement) => {
       // Stop the form from submitting and refreshing the page.
 
-      if (session) {
-        alert(`DANS LA SESSION : ${session.user.mystuff}`)
-        setEvenement(unEvenement)
+      if (unEvenement) {
+        alert(`Selection de : ${unEvenement.titre}`)
       }
       else {
-        alert(`PAS DE SESSION : ${unEvenement.titre}`)
+        alert(`Deselection !`)
       }
-
+      setEvenement(unEvenement)
     }
 
 
@@ -120,7 +115,7 @@ const Post = () => {
     const JSONdata = JSON.stringify(data)
 
     // API endpoint where we send form data.
-    const endpoint = '/api/gsheet/evenement/update'
+    const endpoint = event.target.id.value ==="nouveau" ? '/api/gsheet/evenement/nouveau' : '/api/gsheet/evenement/update'
 
     // Form the request for sending data to the server.
     const options = {
@@ -140,8 +135,58 @@ const Post = () => {
     // Get the response data from server as JSON.
     // If server returns the name submitted, that means the form works.
     const result = await response.json()
-    alert(`Retour de la chose : ${result.message}`)
+    if (event.target.id.value ==="nouveau") {
+      if (response.status == 307) {
+         router.push('/evenement/detail/' + result.newid)
+      }
+    }
+    else {
+      alert(`Mise à jour : ${result.message}`)
+    }
   }
+
+  // Handles the submit event on form submit.
+    const handleDelete = async (session, unEvenement:Evenement) => {
+
+
+      const [action] = await AlertConfirm({title:'Sûr de vouloir supprimer cet évenement ?!', desc:"un si bel évenement...."});
+      if (action) {
+        // Stop the form from submitting and refreshing the page.
+        event.preventDefault()
+
+        // Get data from the form.
+        const data = unEvenement
+
+        // Send the data to the server in JSON format.
+        const JSONdata = JSON.stringify(data)
+
+        // API endpoint where we send form data.
+        const endpoint = '/api/gsheet/evenement/supprimer'
+
+        // Form the request for sending data to the server.
+        const options = {
+          // The method is POST because we are sending data.
+          method: 'POST',
+          // Tell the server we're sending JSON.
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Body of the request is the JSON data we created above.
+          body: JSONdata,
+        }
+
+        // Send the form data to our forms API on Vercel and get a response.
+        const response = await fetch(endpoint, options)
+
+        // Get the response data from server as JSON.
+        // If server returns the name submitted, that means the form works.
+        const result = await response.json()
+        alert(`Mise à jour : ${result.message}`)
+        if (response.status == 200) {
+           router.push('/evenement')
+        }
+      }
+    }
 
   if (!unEvenement) {
     return (<Container
@@ -183,7 +228,7 @@ const Post = () => {
                 <p className="text-gray-700 dark:text-gray-300">
                   <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
                     <label htmlFor="titre">ID</label>
-                    <input type="text" id="id" name="id" defaultValue={unEvenement.id}  />
+                    <input type="text" id="id" name="id" defaultValue={unEvenement.id}  readOnly/>
 
                     <label htmlFor="titre">Titre</label>
                     <input type="text" id="titre" name="titre" defaultValue={unEvenement.titre} required />
@@ -203,23 +248,18 @@ const Post = () => {
                       <Select defaultValue={defaultStatus} options={Status} onChange={setHandleStatus}  />
                     </div>
 
-                    <button type="submit">Submit</button>
+                    <button type="submit">💾 Sauver</button>
                   </form>
-                  <span className="text-gray-500 hover:text-gray-600 transition">
-                    <button onClick={() => handleChooseEvenement(session, unEvenement)}>⏏️</button>{' '}
+                  <span className="flex flex-col justify-center text-gray-500 hover:text-gray-600">
+                    <button onClick={() => handleDelete(session, unEvenement)}>🗑 Supprimer️</button>{' '}
+                  </span>
+                  <span className="flex flex-col justify-center text-gray-500 hover:text-gray-600">
+                    <button onClick={() => handleChooseEvenement(session, unEvenement)}>✅ choisir️</button>{' '}
+                  </span>
+                  <span className="flex flex-col justify-center text-gray-500 hover:text-gray-600">
+                    <button onClick={() => handleChooseEvenement(session, null)}>❌ supprimer selection</button>{' '}
                   </span>
                 </p>
-
-                <div className="md:w-48 mt-2 sm:mt-0">
-                  <Zoom
-                      alt={unEvenement.titre}
-                      height={30}
-                      width={40}
-                      src=""
-                      className="rounded-full"
-                      layout={"responsive"}
-                  />
-                </div>
               </div>
 
             </div>
