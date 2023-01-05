@@ -11,6 +11,18 @@ import type { Inventaire, Evenement, Utilisateur } from '../../../interfaces'
 
 // Fake users data
 
+function getDateString() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day =`${date.getDate()}`.padStart(2, '0');
+
+  const hour =`${date.getHours()}`.padStart(2, '0');
+  const min =`${date.getMinutes()}`.padStart(2, '0');
+  const sec =`${date.getSeconds()}`.padStart(2, '0');
+  return `${year}${month}${day}_${hour}${min}${sec}`
+}
+
 export  default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await unstable_getServerSession(req, res, authOptions)
 
@@ -20,6 +32,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
     body: { body },
     method,
   } = req
+
 
   if (session && !params) return res.status(500).json({ message: "Invalid parameters" })
   if (session && params.length < 2) return res.status(500).json({ message: "Invalid parameters count" })
@@ -56,23 +69,23 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       console.log(req.body.file)
 
       const accessTypeForGSheet = ['https://www.googleapis.com/auth/drive.file',
-                                       'https://www.googleapis.com/auth/drive',
-                                       'https://www.googleapis.com/auth/drive.file',
-                                       'https://www.googleapis.com/auth/drive.metadata'
-                                     ];
+                                   'https://www.googleapis.com/auth/drive',
+                                   'https://www.googleapis.com/auth/drive.file',
+                                   'https://www.googleapis.com/auth/drive.metadata'
+                                  ];
       const jwt = new google.auth.JWT(
-            process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-            undefined,
-            (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-            accessTypeForGSheet
-          );
+          process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+          undefined,
+          (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+          accessTypeForGSheet
+        );
 
-        const drive = google.drive({ version: 'v3', auth: jwt });
+      const drive = google.drive({ version: 'v3', auth: jwt });
 
-
+/*
        const resList = await drive.files.list({
           pageSize: 10,
-          fields: 'nextPageToken, files(id, name)',
+          fields: 'nextPageToken, files(id, name, trashed, parents, mimeType)',
         });
         const files = resList.data.files;
         if (files.length === 0) {
@@ -80,26 +93,53 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         } else {
           console.log('Files:');
           files.map((file) => {
-            console.log(`"${file.name}" (id==${file.id})`);
+            console.log(`"${file.name}" (id==${file.id}) (mimeType==${file.mimeType}) (trashed==${file.trashed}) (parents==${file.parents})`);
+
+            if ( file.parents && file.parents[0] === '1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv' && false ) {
+              drive.files.delete(
+              { fileId: file.id }
+              , (err, retour) => {
+                if (err) {
+                  // Handle error
+                  console.error(`"${file.name}" (id==${file.id})` + ' : DELETE donné à SGDF errrrrrrrrrrrror : ', err.message);
+                } else {
+                  console.log(`"${file.name}" (id==${file.id})` + ' : DELETE donné à SGDF ok : ', file.id);
+                }
+              });
 
 
-            drive.permissions.create({
-              fileId: file.id,
-              moveToNewOwnersRoot: true
-            }, (err, retour) => {
-             if (err) {
-               // Handle error
-               console.error(err);
-             } else {
-               console.log('Ownership donné à SGDF ok : ', file.id);
-             }
-           });
+
+              drive.permissions.create({
+                fileId: file.id,
+  //              moveToNewOwnersRoot: true,
+                transferOwnership: true,
+                        requestBody: {
+                          name: "permission X",
+                          value: 'sgdf.thionville@gmail.com',
+                          role: 'owner',
+                          type: 'user',
+                          emailAddress: 'sgdf.thionville@gmail.com'
+                        }
+              }, (err, retour) => {
+               if (err) {
+                 // Handle error
+                 console.error(`"${file.name}" (id==${file.id})` + ' : Ownership donné à SGDF errrrrrrrrrrrror : ', err.message);
+               } else {
+                 console.log(`"${file.name}" (id==${file.id})` + ' : Ownership donné à SGDF ok : ', file.id);
+               }
+             });
+
+            }
           });
         }
 
+        //return res.status(200).json({ message: "Droits seulement" })
+
+*/
+
         const fileMetadata = {
-          'name': 'photo.jpg',
-          parents: ['1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv']
+          'name': 'photo_'  + getDateString() + '.jpg',
+          parents: ['1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv'],
         };
 
         const filename = 'public/images/profile.jpg'
@@ -111,11 +151,32 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         const fileSize = fs.statSync(filename).size;
       //return res.status(200).json({ message: "ouais, image quoi" })
 
-        console.log("prêt pour UPLOAD ici " + media.body.size)
+        const dirMetadata = {
+            name: 'Test',
+            parents: ['1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv'],
+            mimeType: 'application/vnd.google-apps.folder',
+          };
+
+          const dirCreateRequest = {
+              resource: dirMetadata,
+              fields: 'id',
+          }
+
+          try {
+            const dir = await drive.files.create(dirCreateRequest);
+            console.log('Folder Id:', dir.data.id);
+
+          } catch (err) {
+            // TODO(developer) - Handle error
+            throw err;
+          }
+
+
+        console.log("prêt pour UPLOAD ici " + fileSize)
         const createRequest = {
           resource: fileMetadata,
           media: media,
-          fields: 'id'
+          fields: 'id, name'
         }
         drive.files.create(createRequest, (err, file) => {
           if (err) {
@@ -126,7 +187,48 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           }
         });
 
-      return res.status(200).json({ message: "ouais, image quoi" })
+/*
+        try {
+          const file = await drive.files.create(createRequest);
+          console.log('File Id:', file.data.id, file.data.name);
+
+        } catch (err) {
+          // TODO(developer) - Handle error
+          throw err;
+        }
+ */
+ //       const file =  drive.files.create(createRequest)
+
+        /*
+        , (err, file) => {
+          if (err) {
+            // Handle error
+            console.error(err);
+          } else {
+            console.log('File uplodadedddd avec success et avec Id: ', file.data.id );
+
+
+            drive.permissions.create({
+              fileId: file.data.id,
+              requestBody: {
+                name: "permission X",
+                value: 'sgdf.thionville@gmail.com',
+                role: 'reader',
+                type: 'anyone',
+              }
+            }, (err, retour) => {
+             if (err) {
+               // Handle error
+               console.error(`"${file.data.name}" (id==${file.data.id})` + ' : Ownership donné à SGDF NOT OK : ', err.message);
+             } else {
+               console.log(`"${file.data.name}" (id==${file.data.id})` + ' : Ownership donné à SGDF OK : ', file.data.id);
+             }
+           });
+
+          }
+        });*/
+
+      return res.status(200).json({ message: "Image !!!!!!" })
     }
 
 

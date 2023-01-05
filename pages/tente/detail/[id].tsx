@@ -6,7 +6,6 @@ import PacmanLoader from "react-spinners/PacmanLoader";
 
 import { useSession, signIn, signOut } from "next-auth/react"
 
-
 import useSwr from 'swr'
 import type { Inventaire } from '../../../interfaces'
 import { useRouter } from 'next/router';
@@ -30,9 +29,37 @@ const Post = () => {
   const [url, setUrl] = useState("");
   const [file, setFile] = useState(null);
 
+
+  const [image, setImage] = useState(null);
+  const [createObjectURL, setCreateObjectURL] = useState(null);
+  const uploadToClient = (event) => {
+      if (event.target.files && event.target.files[0]) {
+        const i = event.target.files[0];
+
+        setImage(i);
+        setCreateObjectURL(URL.createObjectURL(i));
+      }
+    };
+
+    const uploadToServer = async (event) => {
+        event.preventDefault()
+
+        const body = new FormData();
+        body.append("file", image);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body
+        });
+
+        const result = await response.json()
+        alert(result.message)
+      };
+
   const handleFileChange = (e) => {
     const file = {
       preview: URL.createObjectURL(e.target.files[0]),
+      path: e.target.files[0].path,
       data: e.target.files[0],
     };
     setFile(file);
@@ -42,12 +69,12 @@ const Post = () => {
 
     event.preventDefault()
 
-    const [action] = await AlertConfirm({title:'Sûr de vouloir supprimer cet évenement ?!', desc:"un si bel évenement...."});
+    const [action] = await AlertConfirm({title:'Upload d\'image ??', desc:"un si bel évenement...."});
     if (action) {
       // Stop the form from submitting and refreshing the page.
 
       // Get data from the form.
-      const data = { file: file.data}
+      const data = {  }
 
       // Send the data to the server in JSON format.
       const JSONdata = JSON.stringify(data)
@@ -73,15 +100,9 @@ const Post = () => {
       // Get the response data from server as JSON.
       // If server returns the name submitted, that means the form works.
       const result = await response.json()
-      alert(`Mise à jour : ${result.message}`)
-
+      alert(result.message)
     }
   }
-
-
-
-
-
 
   if (!post) {
     return (<Container
@@ -118,11 +139,25 @@ const Post = () => {
                   {post.contentDeMoi}
                 </p>
 
-                <form onSubmit={handleImage}>
-                  <input type="file" name="files" onChange={handleFileChange}></input>
-                  <button type="submit">🗑 Images ?️</button>
-                </form>
 
+                <img src={createObjectURL} />
+                <form >
+
+                  <h4>Select Image</h4>
+                  <input type="file" name="myImage" onChange={uploadToClient} />
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                    onClick={handleImage}
+                  >
+                    🗑 Images ?
+                  </button>
+                </form>
+                Ici
+                <p className="text-gray-700 dark:text-gray-300">
+                  {file ? (file.path ? file.path  :"nullx") : "nulll"}
+                </p>
+                Et la
 
                 <div className="md:w-48 mt-2 sm:mt-0">
                   <Zoom
@@ -135,7 +170,6 @@ const Post = () => {
                   />
                 </div>
               </div>
-
             </div>
             <div className="prose dark:prose-dark w-full">ça c'est une tente</div>
           </article>
