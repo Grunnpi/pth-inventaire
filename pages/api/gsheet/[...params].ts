@@ -9,20 +9,6 @@ const fs = require('fs');
 
 import type { Inventaire, Evenement, Utilisateur } from '../../../interfaces'
 
-// Fake users data
-
-function getDateString() {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  const day =`${date.getDate()}`.padStart(2, '0');
-
-  const hour =`${date.getHours()}`.padStart(2, '0');
-  const min =`${date.getMinutes()}`.padStart(2, '0');
-  const sec =`${date.getSeconds()}`.padStart(2, '0');
-  return `${year}${month}${day}_${hour}${min}${sec}`
-}
-
 export  default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await unstable_getServerSession(req, res, authOptions)
 
@@ -42,16 +28,10 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
 
   // basic error handling
   if (!session) {
-    if (the_type !== "utilisateur") {
-      return res.status(401).json({ message: "Unauthorized stuff" })
-    }
-    else {
-      console.log("gsheet fetch user / no session")
-    }
+    return res.status(401).json({ message: "Unauthorized stuff" })
   }
 
   if (true) {
-
     var the_detail_id:string = ""
     var isDetailAction = false
     // sanity check : gestion action sur 1 detail
@@ -64,177 +44,9 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
-    if ( the_type === "image" ) {
-      console.log("test les trucs avec les images")
-      console.log(req.body.file)
-
-      const accessTypeForGSheet = ['https://www.googleapis.com/auth/drive.file',
-                                   'https://www.googleapis.com/auth/drive',
-                                   'https://www.googleapis.com/auth/drive.file',
-                                   'https://www.googleapis.com/auth/drive.metadata'
-                                  ];
-      const jwt = new google.auth.JWT(
-          process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-          undefined,
-          (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-          accessTypeForGSheet
-        );
-
-      const drive = google.drive({ version: 'v3', auth: jwt });
-
-/*
-       const resList = await drive.files.list({
-          pageSize: 10,
-          fields: 'nextPageToken, files(id, name, trashed, parents, mimeType)',
-        });
-        const files = resList.data.files;
-        if (files.length === 0) {
-          console.log('No files found.');
-        } else {
-          console.log('Files:');
-          files.map((file) => {
-            console.log(`"${file.name}" (id==${file.id}) (mimeType==${file.mimeType}) (trashed==${file.trashed}) (parents==${file.parents})`);
-
-            if ( file.parents && file.parents[0] === '1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv' && false ) {
-              drive.files.delete(
-              { fileId: file.id }
-              , (err, retour) => {
-                if (err) {
-                  // Handle error
-                  console.error(`"${file.name}" (id==${file.id})` + ' : DELETE donné à SGDF errrrrrrrrrrrror : ', err.message);
-                } else {
-                  console.log(`"${file.name}" (id==${file.id})` + ' : DELETE donné à SGDF ok : ', file.id);
-                }
-              });
-
-
-
-              drive.permissions.create({
-                fileId: file.id,
-  //              moveToNewOwnersRoot: true,
-                transferOwnership: true,
-                        requestBody: {
-                          name: "permission X",
-                          value: 'sgdf.thionville@gmail.com',
-                          role: 'owner',
-                          type: 'user',
-                          emailAddress: 'sgdf.thionville@gmail.com'
-                        }
-              }, (err, retour) => {
-               if (err) {
-                 // Handle error
-                 console.error(`"${file.name}" (id==${file.id})` + ' : Ownership donné à SGDF errrrrrrrrrrrror : ', err.message);
-               } else {
-                 console.log(`"${file.name}" (id==${file.id})` + ' : Ownership donné à SGDF ok : ', file.id);
-               }
-             });
-
-            }
-          });
-        }
-
-        //return res.status(200).json({ message: "Droits seulement" })
-
-*/
-
-        const fileMetadata = {
-          'name': 'photo_'  + getDateString() + '.jpg',
-          parents: ['1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv'],
-        };
-
-        const filename = 'public/images/profile.jpg'
-        const media = {
-          mimeType: 'image/jpeg',
-          body: fs.createReadStream(filename)
-        };
-
-        const fileSize = fs.statSync(filename).size;
-      //return res.status(200).json({ message: "ouais, image quoi" })
-
-        const dirMetadata = {
-            name: 'Test',
-            parents: ['1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv'],
-            mimeType: 'application/vnd.google-apps.folder',
-          };
-
-          const dirCreateRequest = {
-              resource: dirMetadata,
-              fields: 'id',
-          }
-
-          try {
-            const dir = await drive.files.create(dirCreateRequest);
-            console.log('Folder Id:', dir.data.id);
-
-          } catch (err) {
-            // TODO(developer) - Handle error
-            throw err;
-          }
-
-
-        console.log("prêt pour UPLOAD ici " + fileSize)
-        const createRequest = {
-          resource: fileMetadata,
-          media: media,
-          fields: 'id, name'
-        }
-        drive.files.create(createRequest, (err, file) => {
-          if (err) {
-            // Handle error
-            console.error(err);
-          } else {
-            console.log('File uplodadedddd avec success et avec Id: ', file.data.id);
-          }
-        });
-
-/*
-        try {
-          const file = await drive.files.create(createRequest);
-          console.log('File Id:', file.data.id, file.data.name);
-
-        } catch (err) {
-          // TODO(developer) - Handle error
-          throw err;
-        }
- */
- //       const file =  drive.files.create(createRequest)
-
-        /*
-        , (err, file) => {
-          if (err) {
-            // Handle error
-            console.error(err);
-          } else {
-            console.log('File uplodadedddd avec success et avec Id: ', file.data.id );
-
-
-            drive.permissions.create({
-              fileId: file.data.id,
-              requestBody: {
-                name: "permission X",
-                value: 'sgdf.thionville@gmail.com',
-                role: 'reader',
-                type: 'anyone',
-              }
-            }, (err, retour) => {
-             if (err) {
-               // Handle error
-               console.error(`"${file.data.name}" (id==${file.data.id})` + ' : Ownership donné à SGDF NOT OK : ', err.message);
-             } else {
-               console.log(`"${file.data.name}" (id==${file.data.id})` + ' : Ownership donné à SGDF OK : ', file.data.id);
-             }
-           });
-
-          }
-        });*/
-
-      return res.status(200).json({ message: "Image !!!!!!" })
-    }
-
-
     if (isDetailAction && the_detail_id === "nouveau") {
       switch (the_type) {
-        case "tente":
+        case "inventaire":
           return res.status(200).json({ id: "nouveau" })
           break
         case "evenement":
@@ -262,8 +74,8 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         const range ="Evenement"
         const data = [
             {
-              values: [["=LIGNE()", evenement.titre, evenement.type, evenement.unite, evenement.status]],
-              range: `'${range}'!A${evenement.id}:E${evenement.id}`
+              values: [[evenement.id,  evenement.titre, evenement.type, evenement.unite, evenement.status]],
+              range: `'${range}'!A${evenement.rowid}:E${evenement.rowid}`
             }
             ]
 
@@ -304,8 +116,8 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
                 "range": {
                   "sheetId": 1915467561,
                   "dimension": "ROWS",
-                  "startIndex": parseInt(evenement.id) - 1,
-                  "endIndex": parseInt(evenement.id)
+                  "startIndex": parseInt(evenement.rowid) - 1,
+                  "endIndex": parseInt(evenement.rowid)
                 }
               }
             }
@@ -324,38 +136,14 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         const request = {
             // The spreadsheet to apply the updates to.
             spreadsheetId: process.env.SHEET_ID,  // TODO: Update placeholder value.
-
             resource: batchUpdateRequest,
-
-            //auth: authClient,
           };
 
         const response = await myGoogleSheet.spreadsheets.batchUpdate(request)
-
-          //spreadsheetId: process.env.SHEET_ID,
-        //  resource: batchUpdateRequest
-         /* resource:
-            requests: [
-                      {
-                        deleteDimension: {
-                          range: {
-                            sheetId: "1915467561",
-                            dimension: "ROWS",
-                            startIndex: parseInt(evenement.id) - 1,
-                            endIndex: evenement.id
-                          }
-                        }
-                      }
-                    ]
-          */
-
-
         console.log(response)
-
         return res.status(200).json({ message: the_type + " update ok" })
       }
     }
-
 
     if (the_sous_type === "nouveau") {
       console.log("En mode CREATE")
@@ -368,7 +156,6 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         console.log(evenement)
 
         const range ="Evenement"
-
         const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
         const jwt = new google.auth.JWT(
               process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -382,7 +169,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           range: `Evenement`,
           valueInputOption: "USER_ENTERED",
           resource: {
-                      values: [["=LIGNE()", evenement.titre, evenement.type, evenement.unite, evenement.status]],
+                      values: [[evenement.id, evenement.titre, evenement.type, evenement.unite, evenement.status]],
                     },
         }
 
@@ -394,8 +181,8 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           range: `Evenement`,
           valueRenderOption
         });
-       const row = responseCount.data.values.length;
 
+        const row = responseCount.data.values.length;
         return res.status(307).json({ message: the_type + " create ok" , newid:row})
        //return res.redirect(307, `/evenement/detail/666`);
 
@@ -403,14 +190,13 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
-    // gestion tentes uniquement
     var gsheet_range:string = ""
     switch (the_type) {
-      case "tente":
+      case "inventaire":
         if (isDetailAction) {
           gsheet_range = `Matériel!A${the_detail_id}:H${the_detail_id}`
         } else {
-          gsheet_range = `Matériel!A301:H309`;
+          gsheet_range = `Matériel!A2:H`;
         }
         break
       case "evenement":
@@ -432,42 +218,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         return res.status(500).json({ message: the_type + " is invalid parameter" })
     }
 
-    // simulation si pas accès internet ou firewall
-    if ( process.env.MY_ENV === "local" ) {
-      console.log("ici Paris")
-      /*
-      switch (the_type) {
-        case "tente":
-            const inventaires: Inventaire[] = [{ id: "50", title:"T50", contentDeMoi:"http://localhost:3000/images/profile.jpg" }, { id: "51", title:"T51", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }, { id: "52", title:"T52", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }]
-            if (isDetailAction) {
-              return res.status(200).json(inventaires[0])
-            }
-            else {
-              return res.status(200).json(inventaires)
-            }
-          break
-        case "evenement":
-            const evenement: Evenement[] = [{ id: "50", title:"T50", contentDeMoi:"http://localhost:3000/images/profile.jpg" }, { id: "51", title:"T51", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }, { id: "52", title:"T52", contentDeMoi:"http://localhost:3000/images/profile.jpg"  }]
-            if (isDetailAction) {
-              return res.status(200).json(evenement[0])
-            }
-            else {
-              return res.status(200).json(evenement)
-            }
-          break
-        case "utilisateur":
-            const utilisateurs: Utilisateur[] = [{ id: "2", nom:"Utilisateur2", mot_de_passe:"xxx", role:"" }]
-            if (isDetailAction) {
-              return res.status(200).json(utilisateurs[0])
-            }
-            else {
-              return res.status(200).json(utilisateurs)
-            }
-          break
-      }
-      */
-    }
-    else {
+    if (true) {
       const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
       const jwt = new google.auth.JWT(
             process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -486,18 +237,19 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
 
       if (response.data.values) {
         switch (the_type) {
-          case "tente":
+          case "inventaire":
             var inventaire: Inventaire = {id:"", title:"", contentDeMoi:""};
             var inventaires: Inventaire[] = [];
             if (isDetailAction) {
               response.data.values.map((oneRowDetail) => (
-                    inventaire = {id: oneRowDetail[0], title: oneRowDetail[2], contentDeMoi: oneRowDetail[5]})
+                    inventaire = {rowid: the_detail_id, id: oneRowDetail[0], title: oneRowDetail[2], contentDeMoi: oneRowDetail[5]})
               )
               return res.status(200).json(inventaire)
             }
             else {
+              var i=2
               response.data.values.map((oneRow) => (
-                    inventaires.push({id: oneRow[0], title: oneRow[2], contentDeMoi: oneRow[3]})
+                    inventaires.push({rowid:(i++).toString(), id: oneRow[0], title: oneRow[2], contentDeMoi: oneRow[3]})
               ))
               return res.status(200).json(inventaires)
             }
@@ -507,13 +259,14 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
             var evenements: Evenement[] = [];
             if (isDetailAction) {
               response.data.values.map((oneRowDetail) => (
-                    evenement = {id: oneRowDetail[0], titre: oneRowDetail[1], type: oneRowDetail[2], unite: oneRowDetail[3], status: oneRowDetail[4]})
+                    evenement = {rowid: the_detail_id, id: oneRowDetail[0], titre: oneRowDetail[1], type: oneRowDetail[2], unite: oneRowDetail[3], status: oneRowDetail[4]})
               )
               return res.status(200).json(evenement)
             }
             else {
+              var i=2
               response.data.values.map((oneRowDetail) => (
-                    evenements.push({id: oneRowDetail[0], titre: oneRowDetail[1], type: oneRowDetail[2], unite: oneRowDetail[3], status: oneRowDetail[4]})
+                    evenements.push({rowid: (i++).toString(), id: oneRowDetail[0], titre: oneRowDetail[1], type: oneRowDetail[2], unite: oneRowDetail[3], status: oneRowDetail[4]})
               ))
               return res.status(200).json(evenements)
             }
@@ -523,13 +276,14 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
             var utilisateurs: Utilisateur[] = [];
             if (isDetailAction) {
               response.data.values.map((oneRowDetail) => (
-                    utilisateur = {id: oneRowDetail[0], nom: oneRowDetail[1], mot_de_passe: oneRowDetail[2], role: oneRowDetail[3]})
+                    utilisateur = {rowid: the_detail_id, id: oneRowDetail[0], nom: oneRowDetail[1], mot_de_passe: oneRowDetail[2], role: oneRowDetail[3]})
               )
               return res.status(200).json(utilisateur)
             }
             else {
+              var i=2
               response.data.values.map((oneRowDetail) => (
-                    utilisateurs.push({id: oneRowDetail[0], nom: oneRowDetail[1], mot_de_passe: oneRowDetail[2], role: oneRowDetail[3]})
+                    utilisateurs.push({rowid: (i++).toString(), id: oneRowDetail[0], nom: oneRowDetail[1], mot_de_passe: oneRowDetail[2], role: oneRowDetail[3]})
               ))
               return res.status(200).json(utilisateurs)
             }

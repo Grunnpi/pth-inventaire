@@ -58,7 +58,7 @@ export default function Home() {
                   {allPostsData.map((evenement) => (
                       <BlogPostCard
                         title={evenement.titre}
-                        slug={evenement.id}
+                        slug={evenement.rowid}
                         //gradient="from-[#D8B4FE] to-[#818CF8]"
                         gradient="from-[#0000FF] to-[#6EE7B7]"
                         the_type="evenement"

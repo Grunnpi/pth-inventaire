@@ -104,6 +104,7 @@ const Post = () => {
 
     // Get data from the form.
     const data = {
+      rowid: event.target.rowid.value,
       id: event.target.id.value,
       titre: event.target.titre.value,
       type: selectedType ? selectedType : defaultType.value,
@@ -213,8 +214,6 @@ const Post = () => {
        defaultType = search(unEvenement.type, Types);
        defaultStatus = search(unEvenement.status, Status);
 
-
-
       return (<Container
           title={`${superTitre}`}
           description={`${superDescription}`}
@@ -227,8 +226,10 @@ const Post = () => {
                 </h1>
                 <p className="text-gray-700 dark:text-gray-300">
                   <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
+                    <label htmlFor="titre">ligne</label>
+                    <input type="text" id="rowid" name="rowid" defaultValue={unEvenement.rowid}  readOnly/>
                     <label htmlFor="titre">ID</label>
-                    <input type="text" id="id" name="id" defaultValue={unEvenement.id}  readOnly/>
+                    <input type="text" id="id" name="id" defaultValue={unEvenement.id}/>
 
                     <label htmlFor="titre">Titre</label>
                     <input type="text" id="titre" name="titre" defaultValue={unEvenement.titre} required />

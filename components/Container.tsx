@@ -78,10 +78,8 @@ export default function Container(props) {
             <MobileMenu />
             <NavItem href="/" text="Base" />
             <NavItem href="/evenement" text="Evenement" />
-            <NavItem href="/tente" text="Tentes" />
-            <NavItem href="/matos" text="Matos" />
-            <NavItem href="/autre" text="Autre" />
-            <NavItem href={evenement ? "/evenement/detail/" + evenement.id : "/"}  text={evenement ? evenement.titre : "X"} />
+            <NavItem href="/inventaire" text="Inventaire" />
+            <NavItem href={evenement ? "/evenement/detail/" + evenement.rowid : "/"}  text={evenement ? evenement.titre : "X"} />
           </div>
           <button
             aria-label="Toggle Dark Mode"

@@ -74,12 +74,12 @@ async function uploadGoogleDrive (form)  {
 
 
       const fileMetadata = {
-        'name': "test2.jpg",
+        'name': form.openedFiles[0].originalFilename,
         parents: ['1kb25TlTfT1ASIbX4ouupcnAnNdQuz8Rv']
       };
 
-      const filename = 'public/images/profile.jpg' //form.openedFiles[0].filepath
-      const mimeType = 'image/jpeg' // form.openedFiles[0].mimetype
+      const filename = form.openedFiles[0].filepath
+      const mimeType = form.openedFiles[0].mimetype
       const media = {
         mimeType: mimeType,
         body: fs.createReadStream(filename)
@@ -101,14 +101,15 @@ async function uploadGoogleDrive (form)  {
         } else {
           console.log('File upload avec success et avec Id: ', file.data.id);
 
-/*
-          drive.permissions.create({
-            fileId: file.data.id,
-            resource: {
-              role: 'reader',
-              type: 'anyone',
-            }
-          }, (err, retour) => {
+          const requestPermission = {
+                                                fileId: file.data.id,
+                                                resource: {
+                                                  role: 'reader',
+                                                  type: 'anyone',
+                                                }
+                                              }
+
+          drive.permissions.create(requestPermission, (err, retour) => {
            if (err) {
              // Handle error
              console.error(`"${file.data.name}" (id==${file.data.id})` + ' : Ownership public ERROR : ', err.message);
@@ -116,7 +117,6 @@ async function uploadGoogleDrive (form)  {
              console.log(`"${file.data.name}" (id==${file.data.id})` + ' : Ownership public OK : ', file.data.id);
            }
          });
-         */
         }
       });
     console.log("ici")

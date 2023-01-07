@@ -49,22 +49,11 @@ export default function Home() {
                   <p>Gestion d'un week-end ou un evenement</p>
                 </a>
 
-                <a href="/tente" className={styles.card}>
-                  <h2>🏕️ Tentes &rarr;</h2>
-                  <p>Liste des tentes du groupe et de leur détails</p>
+                <a href="/inventaire" className={styles.card}>
+                  <h2>🏕️ Inventaire &rarr;</h2>
+                  <p>Liste des tentes, gamelles, matos et de leur détails</p>
                 </a>
 
-                <a href="/matos" className={styles.card}>
-                  <h2>🍳 Matos &rarr;</h2>
-                  <p>Les gamelles, le froissartage, etc !</p>
-                </a>
-
-                <a href="/autre" className={styles.card}>
-                  <h2>❓🌂 Autre &rarr;</h2>
-                  <p>
-                    Puisqu'il faut bien mettre le reste quelque part.
-                  </p>
-                </a>
               </div>
             </div>
           </div>

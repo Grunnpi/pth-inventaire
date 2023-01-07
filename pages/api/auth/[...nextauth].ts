@@ -53,27 +53,18 @@ export default NextAuth({
               ))
             }
 
-            console.log(utilisateurs)
-
-            return { id: utilisateurs[0].id, user: utilisateurs[0].id, name: utilisateurs[0].nom,  email:"toto@titi.org", image:"/images/profile.jpg",  data: { token:"x", refreshToken:"y"}}
-
-            /*
-            const fetchUrl = `${process.env.NEXTAUTH_URL}/api/gsheet/utilisateur/detail/${credentials.user}`
-            const res = await fetch(fetchUrl);
-            console.log(res.body)
-            const user = res.json();
-            if (!res.ok) {
-              throw new Error(user.exception);
+            const search = what => utilisateurs.find(element => element.id === what);
+            const utilisateurX:Utilisateur = search(credentials.user)
+            if (utilisateurX) {
+              if ( utilisateurX.mot_de_passe === credentials.password ) {
+                return { id: utilisateurX.id, user: utilisateurX.id, name: utilisateurX.nom,  email:"toto@titi.org", image:"/images/profile.jpg",  data: { token:"x", refreshToken:"y"}}
+              }
+              else {
+                throw new Error( "mot_de_passe_invalide")
+              }
+            } else {
+              throw new Error( "utilisateur_inconnu")
             }
-
-            // If no error and we have user data, return it
-            if (res.ok && user) {
-              return user;
-            }
-
-            // Return null if user data could not be retrieved
-            return null;
-            */
           },
         }),
   ]
