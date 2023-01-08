@@ -4,8 +4,9 @@ const Context = createContext();
 
 export function EvenementProvider({ children }) {
   const [evenement, setEvenement] = useState(null);
+  const [listeInventaire, setListeInventaire] = useState(null);
   return (
-    <Context.Provider value={[evenement, setEvenement]}>{children}</Context.Provider>
+    <Context.Provider value={[evenement, setEvenement, listeInventaire, setListeInventaire]}>{children}</Context.Provider>
   );
 }
 

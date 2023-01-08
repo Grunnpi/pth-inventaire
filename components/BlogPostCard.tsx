@@ -5,9 +5,13 @@ import cn from 'classnames';
 import fetcher from '../lib/fetcher';
 import { Views } from '../lib/types';
 
+import { useEvenementContext } from "../context/evenement";
+
 export default function BlogPostCard({ title, slug, gradient, the_type }) {
   const { data } = useSWR<Views>(`/api/views/${slug}`, fetcher);
   const views = data?.total;
+
+  const [evenement, setEvenement, listeInventaire, setListeInventaire] = useEvenementContext();
 
   return (
     <Link
@@ -25,6 +29,17 @@ export default function BlogPostCard({ title, slug, gradient, the_type }) {
           </h4>
         </div>
         <div className="flex items-center text-gray-800 dark:text-gray-200 capsize">
+          <button
+            aria-label="Toggle Dark Mode"
+            type="button"
+            className="w-16 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center  hover:ring-2 ring-gray-300  transition-all"
+            onClick={(e) => {
+               alert("click ici")
+                e.preventDefault();
+              }
+            }
+          >➕🛒</button>
+
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"

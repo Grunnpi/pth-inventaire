@@ -57,7 +57,7 @@ const Post = () => {
   const { data: session } = useSession()
   const router = useRouter()
 
-  const [evenement, setEvenement] = useEvenementContext();
+  const [evenement, setEvenement, listeInventaire, setListeInventaire] = useEvenementContext();
   const [selectedUnitee, setSelectedUnitee] = useState(null);
 
   const setHandleUnitee = (e) => {
@@ -89,9 +89,11 @@ const Post = () => {
 
       if (unEvenement) {
         alert(`Selection de : ${unEvenement.titre}`)
+        setListeInventaire(1)
       }
       else {
         alert(`Deselection !`)
+        setListeInventaire(0)
       }
       setEvenement(unEvenement)
     }

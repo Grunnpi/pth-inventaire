@@ -32,7 +32,7 @@ function NavItem({ href, text }) {
 export default function Container(props) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
-  const [evenement, setEvenement] = useEvenementContext();
+  const [evenement, setEvenement, listeInventaire, setListeInventaire] = useEvenementContext();
 
   // After mounting, we have access to the theme
   useEffect(() => setMounted(true), []);
@@ -115,6 +115,14 @@ export default function Container(props) {
               </svg>
             )}
           </button>
+          <button
+            aria-label="Toggle Dark Mode"
+            type="button"
+            className="w-9 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center  hover:ring-2 ring-gray-300  transition-all"
+            onClick={() =>
+              setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
+            }
+          >🛒{listeInventaire ? listeInventaire : "0"}</button>
         </nav>
       </div>
       <main
