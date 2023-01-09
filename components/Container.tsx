@@ -116,13 +116,14 @@ export default function Container(props) {
             )}
           </button>
           <button
-            aria-label="Toggle Dark Mode"
+            aria-label="Evenement list"
             type="button"
             className="w-9 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center  hover:ring-2 ring-gray-300  transition-all"
             onClick={() =>
               setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
             }
           >🛒{listeInventaire ? listeInventaire : "0"}</button>
+
         </nav>
       </div>
       <main

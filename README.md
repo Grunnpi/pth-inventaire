@@ -14,5 +14,8 @@ La chose est deployée https://pth-inventaire.onrender.com.
 
 ## Inspiration
 
+* https://beta.reactjs.org/learn/scaling-up-with-reducer-and-context
+
+---
 * https://redux.js.org/introduction/examples
 * https://codesandbox.io/s/github/reduxjs/redux/tree/master/examples/shopping-cart?file=/src/index.js:216-227
