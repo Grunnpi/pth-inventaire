@@ -13,8 +13,8 @@ export const config = {
 const post = async (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, async function (err, fields, files) {
-    await uploadGoogleDrive(form);
-    return res.status(200).json({ message: "ouais, image quoi" })
+    const the_fileid = await uploadGoogleDrive(form);
+    return res.status(200).json({ message: "ouais, image quoi avec un id " + the_fileid, fileid: the_fileid })
   });
 };
 
@@ -41,6 +41,7 @@ async function uploadGoogleDrive (form)  {
           pageSize: 10,
           fields: 'nextPageToken, files(id, name, trashed, parents, mimeType)',
         });
+
         const files = resList.data.files;
         if (files.length === 0) {
           console.log('No files found.');
@@ -94,10 +95,41 @@ async function uploadGoogleDrive (form)  {
         media: media,
         fields: 'id'
       }
-      drive.files.create(createRequest, (err, file) => {
+
+      var the_fileid = "?"
+      try {
+        const the_file = await drive.files.create(createRequest)
+        console.log("the file")
+        console.log(the_file)
+        const requestPermission = {
+                                  fileId: the_file.data.id,
+                                      resource: {
+                                        role: 'reader',
+                                        type: 'anyone',
+                                      }
+                                    }
+
+          drive.permissions.create(requestPermission, (err, retour) => {
+           if (err) {
+             // Handle error
+             console.error(`"${the_file.data.name}" (id==${the_file.data.id})` + ' : Ownership public ERROR : ', err.message);
+           } else {
+             console.log(`"${the_file.data.name}" (id==${the_file.data.id})` + ' : Ownership public OK : ', the_file.data.id);
+           }
+           });
+        console.log("ici")
+        return the_file.data.id
+      }
+      catch(err) {
+          console.error(err);
+          return "-1"
+      }
+      /*
+      const the_file = await drive.files.create(createRequest, (err, file) => {
         if (err) {
           // Handle error
           console.error(err);
+          return "-1"
         } else {
           console.log('File upload avec success et avec Id: ', file.data.id);
 
@@ -113,15 +145,16 @@ async function uploadGoogleDrive (form)  {
            if (err) {
              // Handle error
              console.error(`"${file.data.name}" (id==${file.data.id})` + ' : Ownership public ERROR : ', err.message);
+             return "-1"
            } else {
              console.log(`"${file.data.name}" (id==${file.data.id})` + ' : Ownership public OK : ', file.data.id);
+             the_fileid = file.data.id
+             return file.data.id
            }
          });
         }
       });
-    console.log("ici")
-    return;
-
+     */
 }
 
 export  default async function handler(req: NextApiRequest, res: NextApiResponse) {
