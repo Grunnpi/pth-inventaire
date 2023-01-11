@@ -216,9 +216,9 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
     switch (the_type) {
       case "inventaire":
         if (isDetailAction) {
-          gsheet_range = `Matériel!A${the_detail_id}:H${the_detail_id}`
+          gsheet_range = `Matériel!A${the_detail_id}:L${the_detail_id}`
         } else {
-          gsheet_range = `Matériel!A2:H`;
+          gsheet_range = `Matériel!A2:L`;
         }
         break
       case "evenement":
@@ -256,23 +256,59 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         valueRenderOption
       });
 
-
+      var idxCol=0
       if (response.data.values) {
         switch (the_type) {
           case "inventaire":
-            var inventaire: Inventaire = {id:"", title:"", contentDeMoi:""};
+            var inventaire: Inventaire = {id:"", nom: ""};
             var inventaires: Inventaire[] = [];
             if (isDetailAction) {
-              response.data.values.map((oneRowDetail) => (
-                    inventaire = {rowid: the_detail_id, id: oneRowDetail[0], title: oneRowDetail[2], contentDeMoi: oneRowDetail[5]})
+              idxCol=0
+              response.data.values.map((oneRowDetail) => {
+                    inventaire = {  rowid: the_detail_id,
+                                    id: oneRowDetail[idxCol++],
+                                    famille: oneRowDetail[idxCol++],
+                                    type: oneRowDetail[idxCol++],
+                                    nom: oneRowDetail[idxCol++],
+                                    imageid: oneRowDetail[idxCol++],
+                                    image_visu: oneRowDetail[idxCol++],
+                                    marquage: oneRowDetail[idxCol++],
+                                    commentaire: oneRowDetail[idxCol++],
+                                    localisation: oneRowDetail[idxCol++],
+                                    etat: oneRowDetail[idxCol++],
+                                    date_etat: oneRowDetail[idxCol++],
+                                    date_arrivee: oneRowDetail[idxCol++],
+                                    origine: oneRowDetail[idxCol++],
+                                  };
+                    idxCol=0;
+                    }
               )
               return res.status(200).json(inventaire)
             }
             else {
               var i=2
-              response.data.values.map((oneRow) => (
-                    inventaires.push({rowid:(i++).toString(), id: oneRow[0], title: oneRow[2], contentDeMoi: oneRow[3]})
-              ))
+              idxCol=0
+              response.data.values.map((oneRowDetail) => {
+                    inventaires.push({
+                                    rowid:(i++).toString(),
+                                    id: oneRowDetail[idxCol++],
+                                    famille: oneRowDetail[idxCol++],
+                                    type: oneRowDetail[idxCol++],
+                                    nom: oneRowDetail[idxCol++],
+                                    imageid: oneRowDetail[idxCol++],
+                                    image_visu: oneRowDetail[idxCol++],
+                                    marquage: oneRowDetail[idxCol++],
+                                    commentaire: oneRowDetail[idxCol++],
+                                    localisation: oneRowDetail[idxCol++],
+                                    etat: oneRowDetail[idxCol++],
+                                    date_etat: oneRowDetail[idxCol++],
+                                    date_arrivee: oneRowDetail[idxCol++],
+                                    origine: oneRowDetail[idxCol++],
+                                  });
+                    idxCol=0;
+                    }
+              )
+              console.log(inventaires.length)
               return res.status(200).json(inventaires)
             }
             break

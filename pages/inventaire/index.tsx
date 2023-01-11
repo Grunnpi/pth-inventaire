@@ -96,14 +96,13 @@ export default function Home() {
               <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
                   {allPostsData.filter(
                       function (unInventaire) {
-                        if (unInventaire.contentDeMoi.toLowerCase().indexOf(`${inputs.searchName.toLowerCase()}`) > 0 || unInventaire.id == "4" || `${inputs.searchAgeFrom}` == '-1') {
-                          unInventaire.contentDeMoi += ""
+                        if ((unInventaire.nom.toLowerCase().indexOf(`${inputs.searchName.toLowerCase()}`) > 0 || unInventaire.id == "4" || `${inputs.searchAgeFrom}` == '-1')) {
                           return unInventaire
                         }
                     }).map((inventaire) => (
                       //if ( inputs.searchName === "toto") {
                         <BlogPostCard
-                          title={inventaire.contentDeMoi}
+                          title={inventaire.nom}
                           slug={inventaire.id}
                           //gradient="from-[#D8B4FE] to-[#818CF8]"
                           gradient="from-[#0000FF] to-[#6EE7B7]"

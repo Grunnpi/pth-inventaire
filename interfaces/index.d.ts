@@ -1,8 +1,18 @@
 export type Inventaire = {
   rowid?: string
   id: string
-  title: string
-  contentDeMoi: string
+  famille?: string
+  type?: string
+  nom: string
+  imageid?: string
+  image_visu?: string
+  marquage?: string
+  commentaire?: string
+  localisation?: string
+  etat?: string
+  date_etat?: string
+  date_arrivee?: string
+  origine?: string
 }
 
 export type Evenement = {
@@ -21,7 +31,6 @@ export type Utilisateur = {
   mot_de_passe?: string
   role?: string
 }
-
 
 export type Image = {
   rowid?: string
