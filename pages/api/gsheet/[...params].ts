@@ -7,7 +7,7 @@ import authOptions from "../../api/auth/[...nextauth]"
 
 const fs = require('fs');
 
-import type { Inventaire, Evenement, Utilisateur } from '../../../interfaces'
+import type { Inventaire, Evenement, Utilisateur, Image } from '../../../interfaces'
 
 export  default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await unstable_getServerSession(req, res, authOptions)
@@ -25,6 +25,8 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
 
   var the_type = params[0]
   var the_sous_type = params[1]
+
+  console.log('gsheet : ' + the_type + "/" + the_sous_type + "/" + method)
 
   // basic error handling
   if (!session) {
@@ -47,13 +49,16 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
     if (isDetailAction && the_detail_id === "nouveau") {
       switch (the_type) {
         case "inventaire":
-          return res.status(200).json({ id: "nouveau" })
+          return res.status(200).json({ rowid: "nouveau" })
           break
         case "evenement":
-          return res.status(200).json({ id: "nouveau" })
+          return res.status(200).json({ rowid: "nouveau" })
           break
         case "utilisateur":
-          return res.status(200).json({ id: "nouveau" })
+          return res.status(200).json({ rowid: "nouveau" })
+          break
+        case "image":
+          return res.status(200).json({ rowid: "nouveau" })
           break
         default:
           console.log(the_type + " is invalid parameter")
@@ -152,10 +157,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         return res.status(500).json({ message: "Need POST for update" })
       } else {
         console.log("Youpi on fait un CREATE")
-        const evenement:Evenement = req.body
-        console.log(evenement)
 
-        const range ="Evenement"
         const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
         const jwt = new google.auth.JWT(
               process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -164,29 +166,49 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
               accessTypeForGSheet
             );
         const myGoogleSheet = google.sheets({ version: 'v4', auth: jwt });
+
+
+        var the_values = []
+        var the_range = ''
+        switch (the_type) {
+          case "evenement":
+            const evenement:Evenement = req.body
+            console.log(evenement)
+            the_range ="Evenement"
+            the_values = [[evenement.id, evenement.titre, evenement.type, evenement.unite, evenement.status]]
+            break
+          case "image":
+            const image:Image = req.body
+            console.log(image)
+            the_range ="Image"
+            the_values = [[image.id, image.nom, image.commentaire, image.googleId, image.url, image.visualisation]]
+            break
+
+        }
+
+
         const request = {
           spreadsheetId: process.env.SHEET_ID,
-          range: `Evenement`,
+          range: the_range,
           valueInputOption: "USER_ENTERED",
           resource: {
-                      values: [[evenement.id, evenement.titre, evenement.type, evenement.unite, evenement.status]],
+                      values: the_values,
                     },
         }
 
-         const response = await myGoogleSheet.spreadsheets.values.append(request);
+        const response = await myGoogleSheet.spreadsheets.values.append(request);
 
+        console.log('nouvelle entité crée - on récupére le rowid')
         const valueRenderOption = 'UNFORMATTED_VALUE' // test pour voir si on arrive à récupérer l'url de l'image mais zob
         const responseCount = await myGoogleSheet.spreadsheets.values.get({
           spreadsheetId: process.env.SHEET_ID,
-          range: `Evenement`,
+          range: the_range,
           valueRenderOption
         });
-
         const row = responseCount.data.values.length;
-        return res.status(307).json({ message: the_type + " create ok" , newid:row})
-       //return res.redirect(307, `/evenement/detail/666`);
+        console.log(row)
 
-//        return res.status(200).json({ message: the_type + " create ok" , newid:row})
+        return res.status(307).json({ message: the_type + " create ok" , newid:row})
       }
     }
 

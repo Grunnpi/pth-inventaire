@@ -21,3 +21,14 @@ export type Utilisateur = {
   mot_de_passe?: string
   role?: string
 }
+
+
+export type Image = {
+  rowid?: string
+  id: string
+  nom?: string
+  commentaire?: string
+  googleId?: string
+  url?: string
+  visualisation?: string
+}

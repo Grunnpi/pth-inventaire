@@ -33,55 +33,46 @@ const Post = () => {
   const [image, setImage] = useState(null);
   const [createObjectURL, setCreateObjectURL] = useState(null);
   const uploadToClient = (event) => {
-      if (event.target.files && event.target.files[0]) {
-        const i = event.target.files[0];
+    if (event.target.files && event.target.files[0]) {
+      const i = event.target.files[0];
 
-        setImage(i);
-        setCreateObjectURL(URL.createObjectURL(i));
-      }
-    };
-
-    const uploadToServer = async (event) => {
-        event.preventDefault()
-
-        const body = new FormData();
-        body.append("file", image);
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body
-        });
-
-        const result = await response.json()
-        alert(result.message)
-        alert(result.fileid)
-      };
-
-  const handleFileChange = (e) => {
-    const file = {
-      preview: URL.createObjectURL(e.target.files[0]),
-      path: e.target.files[0].path,
-      data: e.target.files[0],
-    };
-    setFile(file);
+      setImage(i);
+      setCreateObjectURL(URL.createObjectURL(i));
+    }
   };
 
-  const handleImage = async (event) => {
-
+  const uploadToServer = async (event) => {
     event.preventDefault()
 
-    const [action] = await AlertConfirm({title:'Upload d\'image ??', desc:"un si bel évenement...."});
-    if (action) {
-      // Stop the form from submitting and refreshing the page.
+    const body = new FormData();
+    body.append("file", image);
 
-      // Get data from the form.
-      const data = {  }
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body
+    });
+
+    const result = await response.json()
+
+    // sauve la ref dans IMAGE
+    alert(response.status)
+
+    // Get data from the form.
+      const data = {
+        rowid: "nouveau",
+        id: "=LIGNE()",
+        nom: image.name,
+        commentaire: "",
+        googleId: result.fileid,
+        url: '=CONCAT("https://drive.google.com/uc?export=view&id=";INDIRECT("D" & LIGNE()))',
+        visualisation: '=IMAGE(INDIRECT("E" & LIGNE()))'
+      }
 
       // Send the data to the server in JSON format.
       const JSONdata = JSON.stringify(data)
 
       // API endpoint where we send form data.
-      const endpoint = '/api/gsheet/image/test'
+      const endpoint = '/api/gsheet/image/nouveau'
 
       // Form the request for sending data to the server.
       const options = {
@@ -96,13 +87,14 @@ const Post = () => {
       }
 
       // Send the form data to our forms API on Vercel and get a response.
-      const response = await fetch(endpoint, options)
+      const responseImage = await fetch(endpoint, options)
 
       // Get the response data from server as JSON.
       // If server returns the name submitted, that means the form works.
-      const result = await response.json()
-    }
-  }
+      const resultImage = await responseImage.json()
+      alert(`Mise à jour : ${resultImage.message}`)
+  };
+
 
   if (!post) {
     return (<Container
@@ -158,7 +150,7 @@ const Post = () => {
                 </form>
                 Ici
                 <p className="text-gray-700 dark:text-gray-300">
-                  {image ? (image.path ? file.path  :"nullx") : "nulll"}
+                  {image ? (image.name ? image.name  :"nullx") : "nulll"}
                 </p>
                 Et la
 

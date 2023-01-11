@@ -118,7 +118,7 @@ const Post = () => {
     const JSONdata = JSON.stringify(data)
 
     // API endpoint where we send form data.
-    const endpoint = event.target.id.value ==="nouveau" ? '/api/gsheet/evenement/nouveau' : '/api/gsheet/evenement/update'
+    const endpoint = event.target.rowid.value ==="nouveau" ? '/api/gsheet/evenement/nouveau' : '/api/gsheet/evenement/update'
 
     // Form the request for sending data to the server.
     const options = {
@@ -138,7 +138,7 @@ const Post = () => {
     // Get the response data from server as JSON.
     // If server returns the name submitted, that means the form works.
     const result = await response.json()
-    if (event.target.id.value ==="nouveau") {
+    if (event.target.rowid.value ==="nouveau") {
       if (response.status == 307) {
          router.push('/evenement/detail/' + result.newid)
       }
