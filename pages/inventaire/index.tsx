@@ -96,7 +96,7 @@ export default function Home() {
               <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
                   {allPostsData.filter(
                       function (unInventaire) {
-                        if ((unInventaire.nom.toLowerCase().indexOf(`${inputs.searchName.toLowerCase()}`) > 0 || unInventaire.id == "4" || `${inputs.searchAgeFrom}` == '-1')) {
+                        if ((unInventaire.nom.toLowerCase().indexOf(`${inputs.searchName.toLowerCase()}`) > 0 || unInventaire.id == "3" || `${inputs.searchAgeFrom}` == '-1')) {
                           return unInventaire
                         }
                     }).map((inventaire) => (

@@ -11,6 +11,7 @@ import type { Inventaire } from '../../../interfaces'
 import { useRouter } from 'next/router';
 
 import Select from "react-select";
+import CreatableSelect from 'react-select/creatable';
 
 import Zoom from "next-image-zoom";
 
@@ -20,7 +21,7 @@ import "react-alert-confirm/lib/style.css";
 import { useState } from "react";
 
 
-const Types = [
+const Familles = [
   { value: "Tente", label: "⛺ Tente" },
   { value: "Intendance", label: "🥣 Intendance" },
   { value: "Outils", label: "🔨 Outils" },
@@ -29,7 +30,13 @@ const Types = [
   { value: "Divers", label: "❔ Divers" },
 ];
 
-const Etat = [
+const Types = [
+  { value: "Tente P6", label: "Tente P6" },
+  { value: "Tente P8", label: "Tente P8" },
+  { value: "Tente Tipi", label: "Tente Tipi" },
+];
+
+const Etats = [
   { value: "Neuf", label: "🤩 Neuf" },
   { value: "Bon", label: "😝 Bon" },
   { value: "Moyen", label: "😐 Moyen" },
@@ -43,21 +50,24 @@ const Post = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json())
   const router = useRouter()
   const { id } = router.query
-  const { data: unEvenement, error } = useSwr<Inventaire>(`/api/gsheet/inventaire/detail/${id}`, fetcher)
+  const { data: unInventaire, error } = useSwr<Inventaire>(`/api/gsheet/inventaire/detail/${id}`, fetcher)
   if (error) return <div>Erreur de chargement un truc</div>
 
   const [url, setUrl] = useState("");
   const [file, setFile] = useState(null);
 
-const [selectedUnitee, setSelectedUnitee] = useState(null);
-
-  const setHandleUnitee = (e) => {
-    setSelectedUnitee(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
+  const [selectedFamille, setSelectedFamille] = useState(null);
+  const setHandleFamille = (e) => {
+    setSelectedFamille(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
   };
 
   const [selectedType, setSelectedType] = useState(null);
   const setHandleType = (e) => {
-    setSelectedType(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
+    if (e) {
+      setSelectedType(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
+    } else {
+      setSelectedType(null)
+    }
   };
 
   const [selectedEtat, setSelectedEtat] = useState(null);
@@ -65,8 +75,20 @@ const [selectedUnitee, setSelectedUnitee] = useState(null);
     setSelectedEtat(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
   };
 
-  var defaultType
-  var defaultEtat
+  const [commentaire, setCommentaire] = useState({});
+  const commentaireChange = (e) => {
+    console.log("pouet")
+      const value = e.target.value;
+      setCommentaire({
+        ...commentaire,
+        [e.target.commentaire]: value
+      });
+  };
+
+  var defaultFamille = Types.find(c => c.value == "Tente")
+  var defaultType = Types.find(c => c.value == "")
+  var defaultTypeValue
+  var defaultEtat = Etats.find(c => c.value == "Bon")
 
   // Handles the submit event on form submit.
     const handleSubmit = async (event) => {
@@ -76,16 +98,27 @@ const [selectedUnitee, setSelectedUnitee] = useState(null);
       // Get data from the form.
       const data = {
         rowid: event.target.rowid.value,
-        id: event.target.id.value,
-        nom: event.target.nom.value,
+        id: event.target.rowid.value,
+        famille: selectedFamille ? selectedFamille : defaultFamille.value,
         type: selectedType ? selectedType : defaultType.value,
+        nom: event.target.nom.value,
+        imageid: event.target.imageid.value,
+        image_visu: '=IMAGE(INDIRECT("N" & LIGNE()))',
+        marquage: event.target.marquage.value,
+        commentaire: event.target.commentaire.value,
+        localisation: event.target.localisation.value,
+        etat: selectedEtat ? selectedEtat : defaultEtat.value,
+        date_etat: event.target.date_etat.value,
+        date_arrivee: event.target.date_arrivee.value,
+        origine: event.target.origine.value,
+        image_url: '=RECHERCHEV(INDIRECT("E" & LIGNE());Image!A:E;5;FAUX)'
       }
 
       // Send the data to the server in JSON format.
       const JSONdata = JSON.stringify(data)
 
       // API endpoint where we send form data.
-      const endpoint = event.target.rowid.value ==="nouveau" ? '/api/gsheet/evenement/nouveau' : '/api/gsheet/evenement/update'
+      const endpoint = event.target.rowid.value ==="nouveau" ? '/api/gsheet/inventaire/nouveau' : '/api/gsheet/inventaire/update'
 
       // Form the request for sending data to the server.
       const options = {
@@ -107,7 +140,7 @@ const [selectedUnitee, setSelectedUnitee] = useState(null);
       const result = await response.json()
       if (event.target.rowid.value ==="nouveau") {
         if (response.status == 307) {
-           router.push('/evenement/detail/' + result.newid)
+           router.push('/inventaire/detail/' + result.newid)
         }
       }
       else {
@@ -116,7 +149,7 @@ const [selectedUnitee, setSelectedUnitee] = useState(null);
     }
 
     // Handles the submit event on form submit.
-      const handleDelete = async (session, unEvenement:Inventaire) => {
+      const handleDelete = async (session, unInventaire:Inventaire) => {
 
 
         const [action] = await AlertConfirm({title:'Sûr de vouloir supprimer cet évenement ?!', desc:"un si bel évenement...."});
@@ -125,13 +158,13 @@ const [selectedUnitee, setSelectedUnitee] = useState(null);
           event.preventDefault()
 
           // Get data from the form.
-          const data = unEvenement
+          const data = unInventaire
 
           // Send the data to the server in JSON format.
           const JSONdata = JSON.stringify(data)
 
           // API endpoint where we send form data.
-          const endpoint = '/api/gsheet/evenement/supprimer'
+          const endpoint = '/api/gsheet/inventaire/supprimer'
 
           // Form the request for sending data to the server.
           const options = {
@@ -153,13 +186,13 @@ const [selectedUnitee, setSelectedUnitee] = useState(null);
           const result = await response.json()
           alert(`Mise à jour : ${result.message}`)
           if (response.status == 200) {
-             router.push('/evenement')
+             router.push('/inventaire')
           }
         }
       }
 
 
-  if (!unEvenement) {
+  if (!unInventaire) {
     return (<Container
                  title={`???`}
                  description="Je charge..."
@@ -180,86 +213,144 @@ const [selectedUnitee, setSelectedUnitee] = useState(null);
     </Container> )
   }
   else {
-      defaultType = "Tente"
+      defaultFamille = Familles.find(c => c.value == unInventaire.famille)
+      defaultType = Types.find(c => c.value == unInventaire.type)
+      if (!defaultType) {
+        defaultType = { value:"", label:"" }
+        defaultTypeValue = {value:unInventaire.type, label:unInventaire.type}
+      }
+      defaultEtat = Etats.find(c => c.value == unInventaire.etat)
+
       return (<Container
-          title={`PTH [${unEvenement.nom}]`}
+          title={`PTH [${unInventaire.nom}]`}
           description="A collection of code snippets – including serverless functions, Node.js scripts, and CSS tricks."
         >
           <article className="flex flex-col justify-center items-start max-w-2xl mx-auto mb-16 w-full">
             <div className="flex justify-between w-full mb-8">
               <div>
                 <h1 className="font-bold text-3xl md:text-5xl tracking-tight mb-4 text-black dark:text-white">
-                  {unEvenement.nom}
+                  {unInventaire.nom}
                 </h1>
                 <p className="text-gray-700 dark:text-gray-300">
-                  {unEvenement.nom}
+                  Détails de l'objet
                 </p>
 
                 <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
-                  <label htmlFor="titre">ligne</label>
-                  <input type="text" id="rowid" name="rowid" defaultValue={unEvenement.rowid}  readOnly/>
-                  <label htmlFor="titre">ID</label>
-                  <input type="text" id="id" name="id" defaultValue={unEvenement.id}/>
 
-                  <label htmlFor="titre">Nom</label>
-                  <input type="text" id="titre" name="titre" defaultValue={unEvenement.nom} required />
+                  <table className="flex flex-col w-full text-gray-700 dark:text-gray-300">
+                  <tbody>
+                    <tr>
+                    <td>
+                      <div className="w-full flex flex-col text-gray-700 dark:text-gray-300">
+                        <label htmlFor="titre">ligne</label>
+                        <div>
+                          <input  className="w-20 bg-gray-200 rounded-lg shadow border p-2" type="text" id="rowid" name="rowid" defaultValue={unInventaire.rowid}  readOnly/>
+                          <button className="w-20 rounded-lg border p-2" type="submit">💾</button>
+                          <button className="w-20 rounded-lg border p-2" onClick={() => handleDelete(session, unInventaire)}>🗑️</button>{' '}
+                        </div>
+                        <label htmlFor="titre">ID</label>
+                        <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="id" name="id" defaultValue={unInventaire.id}/>
 
-                  <label htmlFor="type">Famille</label>
-                  <div>
-                    <Select defaultValue={defaultType} options={Types} onChange={setHandleType}  />
-                  </div>
+                        <label htmlFor="type">Famille</label>
+                        <div>
+                          <Select className="w-full" defaultValue={defaultFamille} options={Familles} onChange={setHandleFamille}  />
+                        </div>
+                        <label htmlFor="status">Etat</label>
+                        <div>
+                          <Select className="w-full" defaultValue={defaultEtat} options={Etats} onChange={setHandleEtat}  />
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                        <div className="flex w-full place-content-center md:w-48 mt-2 sm:mt-0">
+                          <Zoom
+                              alt={unInventaire.nom}
+                              height={30}
+                              width={40}
+                              src={unInventaire.image_url}
+                              className="w-full rounded-full"
+                              layout={"responsive"}
+                          />
+                        </div>
+                    </td>
+                    </tr>
+                  </tbody>
+                  </table>
+
                   <label htmlFor="type">Type</label>
                   <div>
-                    <Select defaultValue={defaultType} options={Types} onChange={setHandleType}  />
+                    <CreatableSelect isClearable  defaultValue={defaultTypeValue} options={Types} onChange={setHandleType}  />
                   </div>
+                  <label htmlFor="titre">Nom</label>
+                  <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="nom" name="nom" defaultValue={unInventaire.nom} required />
 
-                  <label htmlFor="status">Etat</label>
-                  <div>
-                    <Select defaultValue={defaultEtat} options={Etat} onChange={setHandleEtat}  />
-                  </div>
                   <label>Commentaire</label>
                   <textarea
                     className="bg-gray-200 w-full rounded-lg shadow border p-2"
                     rows={3}
-                    placeholder="Ecrivez votre publication ici"
-                    onChange={setHandleEtat}
-                    name="pub"
-                    id="pub"
-                    value={unEvenement.commentaire}
+                    placeholder=""
+                    name="commentaire"
+                    id="commentaire"
+                    value={unInventaire.commentaire}
+                    onChange={commentaireChange}
                     ></textarea>
                   <label>Marquage</label>
                   <textarea
                     className="bg-gray-200 w-full rounded-lg shadow border p-2"
                     rows={2}
                     placeholder=""
-                    onChange={setHandleEtat}
-                    name="pub"
-                    id="pub"
-                    value={unEvenement.marquage}
+                    name="marquage"
+                    id="marquage"
+                    value={unInventaire.marquage}
                     ></textarea>
                   <label htmlFor="titre">Localisation</label>
-                  <input className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                  type="text" id="titre" name="titre" defaultValue={unEvenement.localisation} required />
-
-                  <button type="submit">💾 Sauver</button>
-                </form>
-                <span className="flex flex-col justify-center text-gray-500 hover:text-gray-600">
-                  <button onClick={() => handleDelete(session, unEvenement)}>🗑 Supprimer️</button>{' '}
-                </span>
-
-                <div className="md:w-48 mt-2 sm:mt-0">
-                  <Zoom
-                      alt={unEvenement.nom}
-                      height={30}
-                      width={40}
-                      src={unEvenement.image_visu}
-                      className="rounded-full"
-                      layout={"responsive"}
+                  <input
+                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                    type="text"
+                    id="localisation"
+                    name="localisation"
+                    defaultValue={unInventaire.localisation}
                   />
-                </div>
+                  <input
+                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                    type="text"
+                    id="imageid"
+                    defaultValue={unInventaire.imageid}
+                  />
+                  <input
+                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                    type="text"
+                    id="image_visu"
+                    defaultValue={unInventaire.image_visu}
+                  />
+                  <input
+                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                    type="text"
+                    id="date_etat"
+                    defaultValue={unInventaire.date_etat}
+                  />
+                  <input
+                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                    type="text"
+                    id="date_arrivee"
+                    defaultValue={unInventaire.date_arrivee}
+                  />
+                  <input
+                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                    type="text"
+                    id="origine"
+                    defaultValue={unInventaire.origine}
+                  />
+                  <input
+                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                    type="text"
+                    id="image_url"
+                    defaultValue={unInventaire.image_url}
+                  />
+                </form>
               </div>
             </div>
-            <div className="prose dark:prose-dark w-full">ça c'est une tente</div>
+            <div className="prose dark:prose-dark w-full">il n'y a plus rien en dessous</div>
           </article>
         </Container> )
   }

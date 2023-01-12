@@ -13,6 +13,7 @@ export type Inventaire = {
   date_etat?: string
   date_arrivee?: string
   origine?: string
+  image_url?: string
 }
 
 export type Evenement = {

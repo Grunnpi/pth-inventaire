@@ -9,6 +9,11 @@ const fs = require('fs');
 
 import type { Inventaire, Evenement, Utilisateur, Image } from '../../../interfaces'
 
+const maxColonneMateriel = "N"
+const maxColonneEvenement = "E"
+const maxColonneImage = "F"
+const maxColonneUtilisateur = "D"
+
 export  default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await unstable_getServerSession(req, res, authOptions)
 
@@ -73,16 +78,45 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         return res.status(500).json({ message: "Need POST for update" })
       } else {
         console.log("Youpi on fait un UPDATE")
-        const evenement:Evenement = req.body
-        console.log(evenement)
 
-        const range ="Evenement"
-        const data = [
-            {
-              values: [[evenement.id,  evenement.titre, evenement.type, evenement.unite, evenement.status]],
-              range: `'${range}'!A${evenement.rowid}:E${evenement.rowid}`
-            }
-            ]
+        var the_data = []
+        switch (the_type) {
+          case "evenement":
+            const evenement:Evenement = req.body
+            console.log(evenement)
+            the_data = [
+                {
+                  values: [[evenement.id,  evenement.titre, evenement.type, evenement.unite, evenement.status]],
+                  range: `'Evenement'!A${evenement.rowid}:${maxColonneEvenement}${evenement.rowid}`
+                }
+                ]
+            break
+          case "inventaire":
+            const inventaire:Inventaire = req.body
+            console.log(inventaire)
+            the_data = [
+                {
+                  values: [[
+                    inventaire.id,
+                    inventaire.famille,
+                    inventaire.type,
+                    inventaire.nom,
+                    inventaire.imageid,
+                    inventaire.image_visu,
+                    inventaire.marquage,
+                    inventaire.commentaire,
+                    inventaire.localisation,
+                    inventaire.etat,
+                    inventaire.date_etat,
+                    inventaire.date_arrivee,
+                    inventaire.origine
+                  ]],
+                  range: `'Matériel'!A${inventaire.rowid}:${maxColonneMateriel}${inventaire.rowid}`
+                }
+                ]
+            break
+        }
+
 
         const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
         const jwt = new google.auth.JWT(
@@ -96,7 +130,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           spreadsheetId: process.env.SHEET_ID,
           requestBody: {
             valueInputOption: "USER_ENTERED"
-            , data
+            , data : the_data
             }
          });
 
@@ -216,23 +250,23 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
     switch (the_type) {
       case "inventaire":
         if (isDetailAction) {
-          gsheet_range = `Matériel!A${the_detail_id}:L${the_detail_id}`
+          gsheet_range = `Matériel!A${the_detail_id}:${maxColonneMateriel}${the_detail_id}`
         } else {
-          gsheet_range = `Matériel!A2:L`;
+          gsheet_range = `Matériel!A2:${maxColonneMateriel}`;
         }
         break
       case "evenement":
         if (isDetailAction) {
-          gsheet_range = `Evenement!A${the_detail_id}:E${the_detail_id}`
+          gsheet_range = `Evenement!A${the_detail_id}:${maxColonneEvenement}${the_detail_id}`
         } else {
-          gsheet_range = `Evenement!A2:E`;
+          gsheet_range = `Evenement!A2:${maxColonneEvenement}`;
         }
         break
       case "utilisateur":
         if (isDetailAction) {
-          gsheet_range = `Utilisateur!A${the_detail_id}:E${the_detail_id}`
+          gsheet_range = `Utilisateur!A${the_detail_id}:${maxColonneUtilisateur}${the_detail_id}`
         } else {
-          gsheet_range = `Utilisateur!A2:E`;
+          gsheet_range = `Utilisateur!A2:${maxColonneUtilisateur}`;
         }
         break
       default:
@@ -279,6 +313,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
                                     date_etat: oneRowDetail[idxCol++],
                                     date_arrivee: oneRowDetail[idxCol++],
                                     origine: oneRowDetail[idxCol++],
+                                    image_url: oneRowDetail[idxCol++],
                                   };
                     idxCol=0;
                     }
@@ -304,6 +339,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
                                     date_etat: oneRowDetail[idxCol++],
                                     date_arrivee: oneRowDetail[idxCol++],
                                     origine: oneRowDetail[idxCol++],
+                                    image_url: oneRowDetail[idxCol++],
                                   });
                     idxCol=0;
                     }
