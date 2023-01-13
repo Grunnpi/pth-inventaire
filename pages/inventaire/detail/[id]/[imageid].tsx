@@ -55,7 +55,6 @@ const Post = () => {
     const result = await response.json()
 
     // sauve la ref dans IMAGE
-    alert(response.status)
 
     // Get data from the form.
       const data = {
@@ -69,13 +68,13 @@ const Post = () => {
       }
 
       // Send the data to the server in JSON format.
-      const JSONdata = JSON.stringify(data)
+      var JSONdata = JSON.stringify(data)
 
       // API endpoint where we send form data.
       const endpoint = '/api/gsheet/image/nouveau'
 
       // Form the request for sending data to the server.
-      const options = {
+      var options = {
         // The method is POST because we are sending data.
         method: 'POST',
         // Tell the server we're sending JSON.
@@ -92,7 +91,35 @@ const Post = () => {
       // Get the response data from server as JSON.
       // If server returns the name submitted, that means the form works.
       const resultImage = await responseImage.json()
-      alert(`Mise à jour : ${resultImage.message}`)
+
+        alert(`Image dans gsheet : ${resultImage.message} avec ${resultImage.newid} pour ${id}`)
+
+        var responseGetInventaire = await fetch(`/api/gsheet/inventaire/detail/${id}`)
+
+        const unInventaireUpdate:Inventaire = await responseGetInventaire.json()
+        unInventaireUpdate.imageid = resultImage.newid
+        unInventaireUpdate.image_visu = '=IMAGE(INDIRECT("N" & LIGNE()))',
+        unInventaireUpdate.image_url = '=RECHERCHEV(INDIRECT("E" & LIGNE());Image!A:E;5;FAUX)'
+
+        JSONdata = JSON.stringify(unInventaireUpdate)
+        options = {
+          // The method is POST because we are sending data.
+          method: 'POST',
+          // Tell the server we're sending JSON.
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Body of the request is the JSON data we created above.
+          body: JSONdata,
+        }
+
+        alert(JSONdata)
+
+        const responseUpdateInventaire = await fetch(`/api/gsheet/inventaire/update/${id}`, options)
+        alert(responseUpdateInventaire.status)
+        alert("Maj Inventaire")
+
+
   };
 
 

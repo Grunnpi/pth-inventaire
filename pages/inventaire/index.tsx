@@ -17,7 +17,7 @@ export default function Home() {
 
   const [inputs, setInputs] = useState({
       searchName: "",
-      searchAgeFrom: "",
+      searchAgeFrom: "-1",
       searchAgeTo: ""
     });
 
@@ -66,33 +66,34 @@ export default function Home() {
                 Toutes les tentes du groupe. On peut filter par type (P8, P6, Marabout, ...)
                 et on va bien voir quelles autres gadgets on peut ajouter ici
               </p>
-                      <div className="form-group col-md-8">
+                      <div className="w-full rounded-lg shadow border p-2">
                         <input
                           name="searchName"
                           type="text"
-                          className="form-control"
-                          placeholder="Name or MiddleName"
+                          placeholder="Filtre sur nom de l'objet"
                           onChange={handleChange}
                         />
                       </div>
-                      <div className="form-group col-md-2">
-                        <input
-                          name="searchAgeFrom"
-                          type="number"
-                          className="form-control"
-                          placeholder="Age From"
-                          onChange={handleChange}
-                        />
+                      <div className="flex flex-row">
+                        <div className="w-1/2 rounded-lg shadow border p-2">
+                          <input
+                            name="searchAgeFrom"
+                            type="number"
+                            placeholder="Bidon A"
+                            value={inputs.searchAgeFrom}
+                            onChange={handleChange}
+                          />
+                        </div>
+                        <div className="w-1/2 rounded-lg shadow border p-2">
+                          <input
+                            name="searchAgeTo"
+                            type="number"
+                            placeholder="Bidon B"
+                            onChange={handleChange}
+                          />
+                        </div>
                       </div>
-                      <div className="form-group col-md-2">
-                        <input
-                          name="searchAgeTo"
-                          type="number"
-                          className="form-control"
-                          placeholder="Age To A"
-                          onChange={handleChange}
-                        />
-                      </div>
+
               <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
                   {allPostsData.filter(
                       function (unInventaire) {

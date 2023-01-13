@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import cn from 'classnames';
+
 import Head from 'next/head';
 import Image from 'next/image'
 import Container from '../../../components/Container';
@@ -18,7 +21,7 @@ import Zoom from "next-image-zoom";
 import AlertConfirm, { Button } from 'react-alert-confirm';
 import "react-alert-confirm/lib/style.css";
 
-import { useState } from "react";
+import { useState, useEffect  } from "react";
 
 
 const Familles = [
@@ -75,14 +78,14 @@ const Post = () => {
     setSelectedEtat(Array.isArray(e) ? e.map((hotel) => hotel.label) : e.value);
   };
 
-  const [commentaire, setCommentaire] = useState({});
-  const commentaireChange = (e) => {
-    console.log("pouet")
-      const value = e.target.value;
-      setCommentaire({
-        ...commentaire,
-        [e.target.commentaire]: value
-      });
+  const [commentaire, setCommentaire] = useState('');
+  const handleCommentaireChange = event => {
+    setCommentaire(event.target.value);
+  };
+
+  const [marquage, setMarquage] = useState('');
+  const handleMarquageChange = event => {
+    setMarquage(event.target.value);
   };
 
   var defaultFamille = Types.find(c => c.value == "Tente")
@@ -104,8 +107,8 @@ const Post = () => {
         nom: event.target.nom.value,
         imageid: event.target.imageid.value,
         image_visu: '=IMAGE(INDIRECT("N" & LIGNE()))',
-        marquage: event.target.marquage.value,
-        commentaire: event.target.commentaire.value,
+        marquage: marquage,
+        commentaire: commentaire,
         localisation: event.target.localisation.value,
         etat: selectedEtat ? selectedEtat : defaultEtat.value,
         date_etat: event.target.date_etat.value,
@@ -191,6 +194,13 @@ const Post = () => {
         }
       }
 
+   useEffect(() => {
+      if(unInventaire){
+        setCommentaire(unInventaire.commentaire);
+        setMarquage(unInventaire.marquage);
+      }
+    }, [unInventaire]);
+
 
   if (!unInventaire) {
     return (<Container
@@ -232,7 +242,9 @@ const Post = () => {
                   {unInventaire.nom}
                 </h1>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Détails de l'objet
+                  <a href={`/inventaire/`} >
+                    ◀️ Revenir vers Inventaire
+                  </a>
                 </p>
 
                 <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
@@ -250,32 +262,49 @@ const Post = () => {
                         </div>
                         <label htmlFor="titre">ID</label>
                         <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="id" name="id" defaultValue={unInventaire.id}/>
-
-                        <label htmlFor="type">Famille</label>
-                        <div>
-                          <Select className="w-full" defaultValue={defaultFamille} options={Familles} onChange={setHandleFamille}  />
-                        </div>
-                        <label htmlFor="status">Etat</label>
-                        <div>
-                          <Select className="w-full" defaultValue={defaultEtat} options={Etats} onChange={setHandleEtat}  />
-                        </div>
                       </div>
                     </td>
                     <td>
-                        <div className="flex w-full place-content-center md:w-48 mt-2 sm:mt-0">
-                          <Zoom
-                              alt={unInventaire.nom}
-                              height={30}
-                              width={40}
-                              src={unInventaire.image_url}
-                              className="w-full rounded-full"
-                              layout={"responsive"}
-                          />
+                        <div className="w-full truncate min-h-full h-full place-content-center md:w-48 mt-2 sm:mt-0 rounded-lg shadow border p-2">
+                          {unInventaire.image_url ?
+                            <Zoom
+                                alt={unInventaire.nom}
+                                height={30}
+                                width={40}
+                                src={unInventaire.image_url}
+                                layout={"responsive"}
+                            />
+                            :
+                            <Link
+                              href={`/inventaire/detail/${id}/nouveau`}
+                            >
+                              <Image className=""
+                                src="/images/profile.jpg"
+                                alt="Pas d'image"
+                                width="120"
+                                height="120"
+                              />
+                            </Link>
+                          }
                         </div>
                     </td>
                     </tr>
                   </tbody>
                   </table>
+                  <div className="flex flex-row w-full text-gray-700 dark:text-gray-300">
+                    <div className="w-1/2">
+                      <label htmlFor="type">Famille</label>
+                      <div>
+                        <Select menuShouldScrollIntoView={false} menuPlacement="bottom" isSearchable={false} className="w-full" defaultValue={defaultFamille} options={Familles} onChange={setHandleFamille}  />
+                      </div>
+                    </div>
+                    <div className="w-1/2">
+                      <label htmlFor="status">Etat</label>
+                      <div className="text-red-500 bg-gray-200 w-full rounded-lg">
+                        <Select menuShouldScrollIntoView={false} menuPlacement="bottom" isSearchable={false} className="w-full" defaultValue={defaultEtat} options={Etats} onChange={setHandleEtat}  />
+                      </div>
+                    </div>
+                  </div>
 
                   <label htmlFor="type">Type</label>
                   <div>
@@ -291,8 +320,8 @@ const Post = () => {
                     placeholder=""
                     name="commentaire"
                     id="commentaire"
-                    value={unInventaire.commentaire}
-                    onChange={commentaireChange}
+                    value={commentaire}
+                    onChange={handleCommentaireChange}
                     ></textarea>
                   <label>Marquage</label>
                   <textarea
@@ -301,7 +330,8 @@ const Post = () => {
                     placeholder=""
                     name="marquage"
                     id="marquage"
-                    value={unInventaire.marquage}
+                    value={marquage}
+                    onChange={handleMarquageChange}
                     ></textarea>
                   <label htmlFor="titre">Localisation</label>
                   <input
@@ -313,28 +343,31 @@ const Post = () => {
                   />
                   <input
                     className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="text"
+                    type="hidden"
                     id="imageid"
                     defaultValue={unInventaire.imageid}
                   />
                   <input
                     className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="text"
+                    type="hidden"
                     id="image_visu"
                     defaultValue={unInventaire.image_visu}
                   />
+                  <label htmlFor="titre">date_etat</label>
                   <input
                     className="bg-gray-200 w-full rounded-lg shadow border p-2"
                     type="text"
                     id="date_etat"
                     defaultValue={unInventaire.date_etat}
                   />
+                  <label htmlFor="titre">date_arrivee</label>
                   <input
                     className="bg-gray-200 w-full rounded-lg shadow border p-2"
                     type="text"
                     id="date_arrivee"
                     defaultValue={unInventaire.date_arrivee}
                   />
+                  <label htmlFor="titre">origine</label>
                   <input
                     className="bg-gray-200 w-full rounded-lg shadow border p-2"
                     type="text"
@@ -343,7 +376,7 @@ const Post = () => {
                   />
                   <input
                     className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="text"
+                    type="hidden"
                     id="image_url"
                     defaultValue={unInventaire.image_url}
                   />

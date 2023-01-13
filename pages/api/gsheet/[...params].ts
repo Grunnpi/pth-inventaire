@@ -109,7 +109,8 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
                     inventaire.etat,
                     inventaire.date_etat,
                     inventaire.date_arrivee,
-                    inventaire.origine
+                    inventaire.origine,
+                    inventaire.image_url
                   ]],
                   range: `'Matériel'!A${inventaire.rowid}:${maxColonneMateriel}${inventaire.rowid}`
                 }
@@ -318,6 +319,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
                     idxCol=0;
                     }
               )
+              //inventaire.image_url = "/images/profile.jpg"
               return res.status(200).json(inventaire)
             }
             else {
