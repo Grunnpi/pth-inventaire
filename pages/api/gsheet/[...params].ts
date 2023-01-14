@@ -3,11 +3,11 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { google } from 'googleapis';
 
 import { unstable_getServerSession } from "next-auth/next"
-import authOptions from "../../api/auth/[...nextauth]"
+import authOptions from "@api/auth/[...nextauth]"
 
 const fs = require('fs');
 
-import type { Inventaire, Evenement, Utilisateur, Image } from '../../../interfaces'
+import type { Inventaire, Evenement, Utilisateur, Image } from '@interfaces'
 
 const maxColonneMateriel = "N"
 const maxColonneEvenement = "E"

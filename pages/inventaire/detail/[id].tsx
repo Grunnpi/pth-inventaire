@@ -3,14 +3,14 @@ import cn from 'classnames';
 
 import Head from 'next/head';
 import Image from 'next/image'
-import Container from '../../../components/Container';
+import Container from '@components/Container';
 
 import PacmanLoader from "react-spinners/PacmanLoader";
 
 import { useSession, signIn, signOut } from "next-auth/react"
 
 import useSwr from 'swr'
-import type { Inventaire } from '../../../interfaces'
+import type { Inventaire } from '@interfaces'
 import { useRouter } from 'next/router';
 
 import Select from "react-select";
@@ -23,29 +23,8 @@ import "react-alert-confirm/lib/style.css";
 
 import { useState, useEffect  } from "react";
 
+import { Familles, Types, Etats } from "@interfaces/constants.js"
 
-const Familles = [
-  { value: "Tente", label: "⛺ Tente" },
-  { value: "Intendance", label: "🥣 Intendance" },
-  { value: "Outils", label: "🔨 Outils" },
-  { value: "Jeux", label: "🎲 Jeux" },
-  { value: "Pédagogie", label: "👍 Pédagogie" },
-  { value: "Divers", label: "❔ Divers" },
-];
-
-const Types = [
-  { value: "Tente P6", label: "Tente P6" },
-  { value: "Tente P8", label: "Tente P8" },
-  { value: "Tente Tipi", label: "Tente Tipi" },
-];
-
-const Etats = [
-  { value: "Neuf", label: "🤩 Neuf" },
-  { value: "Bon", label: "😝 Bon" },
-  { value: "Moyen", label: "😐 Moyen" },
-  { value: "Mauvais", label: "😒 Mauvais" },
-  { value: "HS", label: "💀 HS" },
-];
 
 const Post = () => {
   const { data: session } = useSession()

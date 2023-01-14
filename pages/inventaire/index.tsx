@@ -1,10 +1,10 @@
 import Link from 'next/link';
 
-import Container from '../../components/Container';
-import BlogPostCard from '../../components/BlogPostCard';
+import Container from '@components/Container';
+import BlogPostCard from '@components/BlogPostCard';
 
 import useSwr from 'swr'
-import type { Inventaire } from '../../interfaces'
+import type { Inventaire } from '@interfaces'
 
 import PacmanLoader from "react-spinners/PacmanLoader";
 
@@ -97,7 +97,11 @@ export default function Home() {
               <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
                   {allPostsData.filter(
                       function (unInventaire) {
-                        if ((unInventaire.nom.toLowerCase().indexOf(`${inputs.searchName.toLowerCase()}`) > 0 || unInventaire.id == "3" || `${inputs.searchAgeFrom}` == '-1')) {
+                        if ( inputs.searchName ) {
+                          if ((unInventaire.nom.toLowerCase().indexOf(`${inputs.searchName.toLowerCase()}`) > 0 || unInventaire.id == "3" )) {
+                            return unInventaire
+                          }
+                        } else {
                           return unInventaire
                         }
                     }).map((inventaire) => (
@@ -105,6 +109,7 @@ export default function Home() {
                         <BlogPostCard
                           title={inventaire.nom}
                           slug={inventaire.id}
+                          url_image={inventaire.image_url}
                           //gradient="from-[#D8B4FE] to-[#818CF8]"
                           gradient="from-[#0000FF] to-[#6EE7B7]"
                           the_type="inventaire"

@@ -1,5 +1,5 @@
 // pages/api/auth/[...nextauth].jsx
-import type { Utilisateur } from '../../../interfaces'
+import type { Utilisateur } from '@interfaces'
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from 'next-auth/providers/credentials'

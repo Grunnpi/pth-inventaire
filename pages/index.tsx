@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import Container from '../components/Container';
+import Container from '@components/Container';
 
 import { useSession, signIn, signOut } from "next-auth/react"
 

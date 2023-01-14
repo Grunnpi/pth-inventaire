@@ -1,13 +1,13 @@
 import Head from 'next/head';
 import Image from 'next/image'
-import Container from '../../../../components/Container';
+import Container from '@components/Container';
 
 import PacmanLoader from "react-spinners/PacmanLoader";
 
 import { useSession, signIn, signOut } from "next-auth/react"
 
 import useSwr from 'swr'
-import type { Inventaire } from '../../../../interfaces'
+import type { Inventaire } from '@interfaces'
 import { useRouter } from 'next/router';
 
 import Zoom from "next-image-zoom";

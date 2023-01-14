@@ -1,10 +1,10 @@
 import Link from 'next/link';
 
-import Container from '../../components/Container';
-import BlogPostCard from '../../components/BlogPostCard';
+import Container from '@components/Container';
+import BlogPostCard from '@components/BlogPostCard';
 
 import useSwr from 'swr'
-import type { Evenement } from '../../interfaces'
+import type { Evenement } from '@interfaces'
 
 import PacmanLoader from "react-spinners/PacmanLoader";
 
@@ -62,6 +62,7 @@ export default function Home() {
                         //gradient="from-[#D8B4FE] to-[#818CF8]"
                         gradient="from-[#0000FF] to-[#6EE7B7]"
                         the_type="evenement"
+                        url_image=""
                       />
                   ))}
               </div>
