@@ -205,8 +205,10 @@ const Post = () => {
       defaultFamille = Familles.find(c => c.value == unInventaire.famille)
       defaultType = Types.find(c => c.value == unInventaire.type)
       if (!defaultType) {
-        defaultType = { value:"", label:"" }
+        defaultType = {value:unInventaire.type, label:unInventaire.type}
         defaultTypeValue = {value:unInventaire.type, label:unInventaire.type}
+      } else {
+        defaultTypeValue = {value:defaultType.value, label:defaultType.label}
       }
       defaultEtat = Etats.find(c => c.value == unInventaire.etat)
 

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import Container from '@components/Container';
-import BlogPostCard from '@components/BlogPostCard';
+import EvenementPostCard from '@components/EvenementPostCard';
 
 import useSwr from 'swr'
 import type { Evenement } from '@interfaces'
@@ -56,13 +56,12 @@ export default function Home() {
               </a>
               <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
                   {allPostsData.map((evenement) => (
-                      <BlogPostCard
+                      <EvenementPostCard
                         title={evenement.titre}
                         slug={evenement.rowid}
-                        //gradient="from-[#D8B4FE] to-[#818CF8]"
-                        gradient="from-[#0000FF] to-[#6EE7B7]"
-                        the_type="evenement"
-                        url_image=""
+                        gradient="from-[#D8B4FE] to-[#818CF8]"
+                        //gradient="from-[#0066FF] to-[#6EE7B7]"
+                        the_api="evenement"
                       />
                   ))}
               </div>
