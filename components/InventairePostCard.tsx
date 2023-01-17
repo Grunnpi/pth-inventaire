@@ -4,13 +4,21 @@ import cn from 'classnames';
 
 import Image from 'next/image'
 
-import { useEvenementContext } from "../context/evenement";
-
 import { Familles, Etats } from "@interfaces/constants.js"
+
+import { useEvenementContext } from "@context/evenement";
 
 
 export default function InventairePostCard({ title, slug, gradient, the_api, url_image, the_famille, the_etat, the_type }) {
-  const [evenement, setEvenement, listeInventaire, setListeInventaire] = useEvenementContext();
+  const { state, dispatch } = useEvenementContext();
+  const { evenement, listeInventaire } = state
+
+  const handleViewPanier = (e) => {
+     if ( evenement ) {
+        dispatch({type: 'inventaire_ajout', payload: slug })
+     }
+     e.preventDefault();
+  }
 
   return (
     <Link
@@ -48,11 +56,7 @@ export default function InventairePostCard({ title, slug, gradient, the_api, url
             aria-label="Ajout au chariot"
             type="button"
             className="w-16 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center hover:ring-2 ring-gray-300  transition-all"
-            onClick={(e) => {
-               alert("click ici")
-                e.preventDefault();
-              }
-            }
+            onClick={(e) => handleViewPanier(e)}
           >➕🛒</button>
         </div>
       </div>

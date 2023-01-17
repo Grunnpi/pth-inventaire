@@ -57,7 +57,9 @@ const Post = () => {
   const { data: session } = useSession()
   const router = useRouter()
 
-  const [evenement, setEvenement, listeInventaire, setListeInventaire] = useEvenementContext();
+  const { state, dispatch } = useEvenementContext();
+  const { evenement, listeInventaire } = state
+
   const [selectedUnitee, setSelectedUnitee] = useState(null);
 
   const setHandleUnitee = (e) => {
@@ -88,14 +90,11 @@ const Post = () => {
       // Stop the form from submitting and refreshing the page.
 
       if (unEvenement) {
-        alert(`Selection de : ${unEvenement.titre}`)
-        setListeInventaire(1)
+        dispatch({type: 'evenement_choix', payload: unEvenement })
       }
       else {
-        alert(`Deselection !`)
-        setListeInventaire(0)
+        dispatch({type: 'evenement_reset' })
       }
-      setEvenement(unEvenement)
     }
 
 

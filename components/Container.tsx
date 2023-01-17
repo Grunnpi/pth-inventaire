@@ -5,10 +5,10 @@ import { useTheme } from 'next-themes';
 import NextLink from 'next/link';
 import cn from 'classnames';
 
-import Footer from '../components/Footer';
-import MobileMenu from '../components/MobileMenu';
+import Footer from '@components/Footer';
+import MobileMenu from '@components/MobileMenu';
 
-import { useEvenementContext } from "../context/evenement";
+import { useEvenementContext } from "@context/evenement";
 
 function NavItem({ href, text }) {
   const router = useRouter();
@@ -32,7 +32,8 @@ function NavItem({ href, text }) {
 export default function Container(props) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
-  const [evenement, setEvenement, listeInventaire, setListeInventaire] = useEvenementContext();
+  const { state, dispatch } = useEvenementContext();
+  const { evenement, listeInventaire } = state
 
   // After mounting, we have access to the theme
   useEffect(() => setMounted(true), []);
@@ -46,6 +47,14 @@ export default function Container(props) {
     type: 'website',
     ...customMeta
   };
+
+  const handleViewPanier = (e) => {
+     if ( evenement ) {
+      alert(listeInventaire)
+      dispatch({type: 'inventaire_reset' })
+     }
+  }
+
 
   return (
     <div className="bg-red-50 dark:bg-gray-900 w-full">
@@ -105,15 +114,21 @@ export default function Container(props) {
               </svg>
             )}
           </button>
-          <button
-            aria-label="Evenement list"
-            type="button"
-            className="w-9 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center  hover:ring-2 ring-gray-300  transition-all"
-            onClick={() =>
-              setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
-            }
-          >🛒{listeInventaire ? listeInventaire : "0"}</button>
 
+          <span class="relative inline-flex rounded-md shadow-sm h-9 w-9">
+            <button
+              aria-label="Evenement list"
+              type="button"
+              className="w-9 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center  hover:ring-2 ring-gray-300  transition-all"
+              onClick={(e) => handleViewPanier(e)}
+            >🛒{listeInventaire.length}</button>
+            { listeInventaire.length > 0 ?
+              <span class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+              </span>
+             :""}
+          </span>
         </nav>
       </div>
       <main

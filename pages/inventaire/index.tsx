@@ -60,11 +60,10 @@ export default function Home() {
           >
             <div className="flex flex-col items-start justify-center max-w-2xl mx-auto mb-16">
               <h1 className="mb-4 text-3xl font-bold tracking-tight text-black md:text-5xl dark:text-white">
-                Tentes
+                Patience
               </h1>
               <p className="mb-4 text-gray-600 dark:text-gray-400">
-                Toutes les tentes du groupe. On peut filter par type (P8, P6, Marabout, ...)
-                et on va bien voir quelles autres gadgets on peut ajouter ici
+                une application sur un hebergeur gratuit implique de grande patience
               </p>
               <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
                   <PacmanLoader color="hsla(216, 67%, 53%, 1)" />
@@ -88,7 +87,7 @@ export default function Home() {
                 et on va bien voir quelles autres gadgets on peut ajouter ici
               </p>
               <div className="flex flex-col max-w-screen">
-                 <div className="flex flex-col xl:flex-row 2xl:flex-row">
+                 <div className="flex flex-col md:flex-row lg:flex-row xl:flex-row 2xl:flex-row">
                      <input
                        name="searchName"
                        className="w-full rounded-lg shadow border p-2 sm:text-yellow-500 md:text-red-500 lg:text-green-500 xl:text-blue-500 2xl:text-pink-500"
@@ -106,7 +105,7 @@ export default function Home() {
                        onChange={handleChange}
                      />
                  </div>
-                 <div className="flex flex-col 2xl:flex-row">
+                 <div className="flex flex-col lg:flex-row xl:flex-row 2xl:flex-row">
                   <div>
                     {Familles.map((uneFamille) => (
                        filtreFamille.includes(uneFamille.value) ?

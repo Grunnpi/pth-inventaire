@@ -19,3 +19,7 @@ La chose est deployée https://pth-inventaire.onrender.com.
 ---
 * https://redux.js.org/introduction/examples
 * https://codesandbox.io/s/github/reduxjs/redux/tree/master/examples/shopping-cart?file=/src/index.js:216-227
+
+explications "reducer"
+* https://devtrium.com/posts/how-to-use-react-usereducer-hook
+* https://medium.com/geekculture/how-to-use-context-usereducer-and-localstorage-in-next-js-cc7bc925d3f2

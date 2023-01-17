@@ -10,7 +10,8 @@ import { Familles, Etats } from "@interfaces/constants.js"
 
 
 export default function EvenementPostCard({ title, slug, gradient, the_api }) {
-  const [evenement, setEvenement, listeInventaire, setListeInventaire] = useEvenementContext();
+  const { state, dispatch } = useEvenementContext();
+  const { evenement, listeInventaire } = state
 
   return (
     <Link
