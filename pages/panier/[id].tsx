@@ -18,9 +18,10 @@ import { useEvenementContext } from "@context/evenement";
 import AlertConfirm, { Button } from 'react-alert-confirm';
 import "react-alert-confirm/lib/style.css";
 
+import InventairePostCard from '@components/InventairePostCard';
 
-const superTitre = "Evenement"
-const superDescription = "Gestion d'un evenement"
+const superTitre = "Panier"
+const superDescription = "Gestion du panier"
 
 const Unites = [
   { value: "GP", label: "🟣 Groupe" },
@@ -94,7 +95,6 @@ const Post = () => {
       }
       else {
         dispatch({type: 'evenement_reset' })
-        dispatch({type: 'inventaire_reset' })
       }
     }
 
@@ -224,52 +224,57 @@ const Post = () => {
             <div className="flex justify-between w-full mb-8">
               <div>
                 <h1 className="font-bold text-3xl md:text-5xl tracking-tight mb-4 text-black dark:text-white">
-                  {unEvenement.titre}
+                  🛒 {unEvenement.titre}
                 </h1>
                 <p className="text-gray-700 dark:text-gray-300">
-                  On crée ou met à jour un évenement, pour ensuite pouvoir gérer son matériel
+                  Ici on vérifie la liste de matos pour un évenement
                 </p>
                 <p className="text-gray-700 dark:text-gray-300">
                   <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
-                    <label htmlFor="titre">ligne</label>
-                    <input type="text" id="rowid" name="rowid" defaultValue={unEvenement.rowid}  readOnly/>
-                    <label htmlFor="titre">ID</label>
-                    <input type="text" id="id" name="id" defaultValue={unEvenement.id}/>
+                    <div className="w-full flex flex-col text-gray-700 dark:text-gray-300">
+                      <label htmlFor="titre">ligne</label>
+                      <div>
+                        <input  className="w-20 bg-gray-200 rounded-lg shadow border p-2" type="text" id="rowid" name="rowid" defaultValue={unEvenement.rowid}  readOnly/>
+                        <button className="w-20 rounded-lg border p-2" type="submit">💾</button>
+                        <button className="w-20 rounded-lg border p-2" title="Deselection !" onClick={() => handleChooseEvenement(session, null)}>❌</button>{' '}
+                      </div>
+                      <label htmlFor="titre">ID</label>
+                      <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="id" name="id" defaultValue={unEvenement.id} readOnly />
+                    </div>
 
                     <label htmlFor="titre">Titre</label>
-                    <input type="text" id="titre" name="titre" defaultValue={unEvenement.titre} required />
+                    <input className="bg-gray-200 text-black w-full rounded-lg shadow border p-2" type="text" id="titre" name="titre" defaultValue={unEvenement.titre} required />
 
                     <label htmlFor="type">Type</label>
                     <div>
-                      <Select defaultValue={defaultType} options={Types} onChange={setHandleType}  />
+                      <Select isDisabled={ true } defaultValue={defaultType} options={Types} onChange={setHandleType}  />
                     </div>
 
                     <label htmlFor="unite">Unité</label>
                     <div>
-                      <Select defaultValue={defaultUnite} options={Unites} onChange={setHandleUnitee}  />
+                      <Select isDisabled={ true }  defaultValue={defaultUnite} options={Unites} onChange={setHandleUnitee}  />
                     </div>
 
                     <label htmlFor="status">Status</label>
                     <div>
                       <Select defaultValue={defaultStatus} options={Status} onChange={setHandleStatus}  />
                     </div>
-
-                    <button type="submit">💾 Sauver</button>
                   </form>
-                  <span className="flex flex-col justify-center text-gray-500 hover:text-gray-600">
-                    <button onClick={() => handleDelete(session, unEvenement)}>🗑 Supprimer️</button>{' '}
-                  </span>
-                  <span className="flex flex-col justify-center text-gray-500 hover:text-gray-600">
-                    <button onClick={() => handleChooseEvenement(session, unEvenement)}>✅ choisir️</button>{' '}
-                  </span>
-                  <span className="flex flex-col justify-center text-gray-500 hover:text-gray-600">
-                    <button onClick={() => handleChooseEvenement(session, null)}>❌ supprimer selection</button>{' '}
-                  </span>
+
+                  <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
+                    {listeInventaire.map((inventaire) => (
+                      //if ( inputs.searchName === "toto") {
+                        <InventairePostCard
+                          unInventaire={inventaire}
+                        />
+                      //}
+                    ))}
+                   </div>
                 </p>
               </div>
 
             </div>
-            <div className="prose dark:prose-dark w-full">ça c'est un evenement</div>
+            <div className="prose dark:prose-dark w-full">ça c'est un panier pour l'evenement</div>
           </article>
         </Container> )
   }

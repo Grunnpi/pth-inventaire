@@ -3,7 +3,7 @@ import { createContext, useContext, useReducer, useMemo  } from "react";
 const Context = createContext();
 
 export const initialState = {
-  evenement: {},
+  evenement: undefined,
   listeInventaire: [],
 };
 
@@ -19,7 +19,7 @@ export const AppReducer = (state, action) => {
       case "evenement_reset": {
          return {
             ...state,
-            evenement: {},
+            evenement: undefined,
          };
       }
       break
@@ -31,6 +31,24 @@ export const AppReducer = (state, action) => {
          if ( !newListeInventaire.includes(action.payload) ) {
            newListeInventaire.push(action.payload)
          }
+         return {
+            ...state,
+            listeInventaire: newListeInventaire
+         };
+      }
+      break
+
+      case "inventaire_retire": {
+
+         // un nouvel objet ?
+         var newListeInventaire = [...state.listeInventaire]
+
+         newListeInventaire = newListeInventaire.filter(
+           function (unInventaireDansListe) {
+             if (!(unInventaireDansListe.id == action.payload.id)) {
+               return unInventaireDansListe
+             }
+         })
          return {
             ...state,
             listeInventaire: newListeInventaire

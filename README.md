@@ -23,3 +23,7 @@ La chose est deployée https://pth-inventaire.onrender.com.
 explications "reducer"
 * https://devtrium.com/posts/how-to-use-react-usereducer-hook
 * https://medium.com/geekculture/how-to-use-context-usereducer-and-localstorage-in-next-js-cc7bc925d3f2
+
+
+outils :
+* https://www.npmjs.com/package/react-confirm-alert

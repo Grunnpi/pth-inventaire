@@ -109,9 +109,9 @@ export default function Home() {
                   <div>
                     {Familles.map((uneFamille) => (
                        filtreFamille.includes(uneFamille.value) ?
-                        <button className="hover:ring-2 ring-gray-300  transition-all overflow-clip overflow-hidden align-text-top text-xs w-18 h-12 rounded-lg border" name={uneFamille.value} onClick={handleChangeFiltreFamille}>{uneFamille.label}</button>
+                        <button className="hover:ring-2 ring-gray-300  transition-all overflow-clip overflow-hidden align-text-top text-xs max-w-[20%] w-18 h-12 rounded-lg border" name={uneFamille.value} onClick={handleChangeFiltreFamille}>{uneFamille.label}</button>
                        :
-                        <button className="hover:ring-2 ring-gray-300  transition-all overflow-clip overflow-hidden align-text-top text-xs w-18 h-12 rounded-lg border text-red-500" name={uneFamille.value} onClick={handleChangeFiltreFamille}>{uneFamille.label}</button>
+                        <button className="hover:ring-2 ring-gray-300  transition-all overflow-clip overflow-hidden align-text-top text-xs max-w-[20%] w-18 h-12 rounded-lg border text-red-500" name={uneFamille.value} onClick={handleChangeFiltreFamille}>{uneFamille.label}</button>
                      ))
                     }
                   </div>
@@ -155,7 +155,8 @@ export default function Home() {
                         }
                     }).map((inventaire) => (
                       //if ( inputs.searchName === "toto") {
-                        <InventairePostCard
+                        <InventairePostCard unInventaire={inventaire}
+                          /*
                           title={inventaire.nom}
                           slug={inventaire.id}
                           url_image={inventaire.image_url}
@@ -165,6 +166,7 @@ export default function Home() {
                           the_famille={inventaire.famille}
                           the_type={inventaire.type}
                           the_etat={inventaire.etat}
+                          */
                         />
                       //}
                   ))}

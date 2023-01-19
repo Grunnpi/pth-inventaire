@@ -31,7 +31,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
   var the_type = params[0]
   var the_sous_type = params[1]
 
-  console.log('gsheet : ' + the_type + "/" + the_sous_type + "/" + method)
+//  console.log('gsheet : ' + the_type + "/" + the_sous_type + "/" + method)
 
   // basic error handling
   if (!session) {
@@ -66,14 +66,11 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           return res.status(200).json({ rowid: "nouveau" })
           break
         default:
-          console.log(the_type + " is invalid parameter")
           return res.status(500).json({ message: the_type + " is invalid parameter" })
       }
     }
 
     if (the_sous_type === "update") {
-      console.log("En mode UPDATE")
-      console.log(method)
       if (method !== "POST") {
         return res.status(500).json({ message: "Need POST for update" })
       } else {
@@ -83,7 +80,6 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         switch (the_type) {
           case "evenement":
             const evenement:Evenement = req.body
-            console.log(evenement)
             the_data = [
                 {
                   values: [[evenement.id,  evenement.titre, evenement.type, evenement.unite, evenement.status]],
@@ -93,7 +89,6 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
             break
           case "inventaire":
             const inventaire:Inventaire = req.body
-            console.log(inventaire)
             the_data = [
                 {
                   values: [[
@@ -140,14 +135,11 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
     }
 
     if (the_sous_type === "supprimer") {
-      console.log("En mode DELETE")
-      console.log(method)
       if (method !== "POST") {
         return res.status(500).json({ message: "Need POST for update" })
       } else {
         console.log("Youpi on fait un DELETE")
         const evenement:Evenement = req.body
-        console.log(evenement)
 
         var batchUpdateRequest = {
           "requests": [
@@ -180,14 +172,11 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           };
 
         const response = await myGoogleSheet.spreadsheets.batchUpdate(request)
-        console.log(response)
         return res.status(200).json({ message: the_type + " update ok" })
       }
     }
 
     if (the_sous_type === "nouveau") {
-      console.log("En mode CREATE")
-      console.log(method)
       if (method !== "POST") {
         return res.status(500).json({ message: "Need POST for update" })
       } else {
@@ -208,13 +197,11 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         switch (the_type) {
           case "evenement":
             const evenement:Evenement = req.body
-            console.log(evenement)
             the_range ="Evenement"
             the_values = [[evenement.id, evenement.titre, evenement.type, evenement.unite, evenement.status]]
             break
           case "image":
             const image:Image = req.body
-            console.log(image)
             the_range ="Image"
             the_values = [[image.id, image.nom, image.commentaire, image.googleId, image.url, image.visualisation]]
             break
@@ -233,7 +220,6 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
 
         const response = await myGoogleSheet.spreadsheets.values.append(request);
 
-        console.log('nouvelle entité crée - on récupére le rowid')
         const valueRenderOption = 'UNFORMATTED_VALUE' // test pour voir si on arrive à récupérer l'url de l'image mais zob
         const responseCount = await myGoogleSheet.spreadsheets.values.get({
           spreadsheetId: process.env.SHEET_ID,
@@ -241,8 +227,6 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           valueRenderOption
         });
         const row = responseCount.data.values.length;
-        console.log(row)
-
         return res.status(307).json({ message: the_type + " create ok" , newid:row})
       }
     }
@@ -271,7 +255,6 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         }
         break
       default:
-        console.log(the_type + " is invalid parameter")
         return res.status(500).json({ message: the_type + " is invalid parameter" })
     }
 
@@ -346,7 +329,6 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
                     idxCol=0;
                     }
               )
-              console.log(inventaires.length)
               return res.status(200).json(inventaires)
             }
             break

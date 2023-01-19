@@ -23,7 +23,7 @@
     "next-image-zoom": "^1.1.7",
     "next-themes": "^0.2.1",
     "react": "18.2.0",
-    "react-alert-confirm": "^4.1.6",
+    "react-confirm-alert": "^3.0.6",
     "react-dom": "18.2.0",
     "react-select": "^5.7.0",
     "react-spinners": "^0.13.7",

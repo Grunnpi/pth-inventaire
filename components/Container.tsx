@@ -10,6 +10,10 @@ import MobileMenu from '@components/MobileMenu';
 
 import { useEvenementContext } from "@context/evenement";
 
+
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+
 function NavItem({ href, text }) {
   const router = useRouter();
   const isActive = router.asPath === href;
@@ -35,6 +39,7 @@ export default function Container(props) {
   const { state, dispatch } = useEvenementContext();
   const { evenement, listeInventaire } = state
 
+
   // After mounting, we have access to the theme
   useEffect(() => setMounted(true), []);
 
@@ -50,8 +55,35 @@ export default function Container(props) {
 
   const handleViewPanier = (e) => {
      if ( evenement ) {
-      alert(listeInventaire)
-      dispatch({type: 'inventaire_reset' })
+        //alert(listeInventaire)
+        router.push('/panier/' + evenement.rowid)
+        //dispatch({type: 'inventaire_reset' })
+     } else {
+        const options = {
+          title: "Il faut d'abord selectionner un Evenement",
+          message: "...lisez donc la doc 😝",
+          buttons: [
+            {
+              label: 'Ah oui',
+
+            },
+            {
+              label: 'En effet',
+
+            }
+          ],
+          closeOnEscape: true,
+          closeOnClickOutside: true,
+          keyCodeForClose: [8, 32],
+          willUnmount: () => {},
+          afterClose: () => {},
+          onClickOutside: () => {},
+          onKeypress: () => {},
+          onKeypressEscape: () => {},
+          overlayClassName: "overlay-custom-class-name",
+        };
+
+        confirmAlert(options);
      }
   }
 
@@ -78,7 +110,6 @@ export default function Container(props) {
             <NavItem href="/" text="Base" />
             <NavItem href="/evenement" text="Evenement" />
             <NavItem href="/inventaire" text="Inventaire" />
-            <NavItem href={evenement ? "/evenement/detail/" + evenement.rowid : "/"}  text={evenement ? evenement.titre : "X"} />
           </div>
           <button
             aria-label="Toggle Dark Mode"
@@ -121,7 +152,7 @@ export default function Container(props) {
               type="button"
               className="w-9 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center  hover:ring-2 ring-gray-300  transition-all"
               onClick={(e) => handleViewPanier(e)}
-            >🛒{listeInventaire.length}</button>
+            >{evenement ? "🛒" + listeInventaire.length : "?"}</button>
             { listeInventaire.length > 0 ?
               <span class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
