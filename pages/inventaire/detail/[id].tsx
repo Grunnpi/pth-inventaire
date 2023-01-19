@@ -18,9 +18,6 @@ import CreatableSelect from 'react-select/creatable';
 
 import Zoom from "next-image-zoom";
 
-import AlertConfirm, { Button } from 'react-alert-confirm';
-import "react-alert-confirm/lib/style.css";
-
 import { useState, useEffect  } from "react";
 
 import { Familles, Types, Etats } from "@interfaces/constants.js"
@@ -133,9 +130,8 @@ const Post = () => {
     // Handles the submit event on form submit.
       const handleDelete = async (session, unInventaire:Inventaire) => {
 
-
-        const [action] = await AlertConfirm({title:'Sûr de vouloir supprimer cet évenement ?!', desc:"un si bel évenement...."});
-        if (action) {
+        alert("Bloqué pour l'instant")
+        if (false) {
           // Stop the form from submitting and refreshing the page.
           event.preventDefault()
 
