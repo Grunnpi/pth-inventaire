@@ -12,8 +12,6 @@ import { useRouter } from 'next/router';
 
 import Zoom from "next-image-zoom";
 
-import AlertConfirm, { Button } from 'react-alert-confirm';
-import "react-alert-confirm/lib/style.css";
 
 import { useState } from "react";
 
