@@ -7,12 +7,13 @@ import authOptions from "@api/auth/[...nextauth]"
 
 const fs = require('fs');
 
-import type { Inventaire, Evenement, Utilisateur, Image } from '@interfaces'
+import type { Inventaire, Evenement, Utilisateur, Image, Materiel_par_evenement } from '@interfaces'
 
 const maxColonneMateriel = "N"
 const maxColonneEvenement = "E"
 const maxColonneImage = "F"
 const maxColonneUtilisateur = "D"
+const maxColonneMaterielParEvenement = "L"
 
 export  default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await unstable_getServerSession(req, res, authOptions)
@@ -31,7 +32,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
   var the_type = params[0]
   var the_sous_type = params[1]
 
-//  console.log('gsheet : ' + the_type + "/" + the_sous_type + "/" + method)
+  console.log('gsheet : ' + the_type + "/" + the_sous_type + "/" + method)
 
   // basic error handling
   if (!session) {
@@ -63,6 +64,9 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           return res.status(200).json({ rowid: "nouveau" })
           break
         case "image":
+          return res.status(200).json({ rowid: "nouveau" })
+          break
+        case "materiel_par_evenement":
           return res.status(200).json({ rowid: "nouveau" })
           break
         default:
@@ -176,11 +180,11 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
-    if (the_sous_type === "nouveau") {
+    if (the_sous_type === "nouveau" || the_sous_type === "batch_insert" ) {
       if (method !== "POST") {
         return res.status(500).json({ message: "Need POST for update" })
       } else {
-        console.log("Youpi on fait un CREATE")
+        console.log("Youpi on fait un CREATE (" + the_sous_type + ')')
 
         const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
         const jwt = new google.auth.JWT(
@@ -197,13 +201,30 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
         switch (the_type) {
           case "evenement":
             const evenement:Evenement = req.body
-            the_range ="Evenement"
+            the_range = "Evenement"
+//            the_range= `'Evenement'!A:${maxColonneEvenement}`
             the_values = [[evenement.id, evenement.titre, evenement.type, evenement.unite, evenement.status]]
             break
           case "image":
             const image:Image = req.body
             the_range ="Image"
             the_values = [[image.id, image.nom, image.commentaire, image.googleId, image.url, image.visualisation]]
+            break
+          case "materiel_par_evenement":
+            const materiel_par_evenement_liste:Materiel_par_evenement[] = req.body
+            the_range = "Matériel_par_Evenement"
+            the_values = []
+            materiel_par_evenement_liste.forEach(materiel_par_evenement => {
+              the_values.push([
+                materiel_par_evenement.rowid_evenement,
+                materiel_par_evenement.id_evenement,
+                materiel_par_evenement.nom_evenement,
+                materiel_par_evenement.rowid_materiel,
+                materiel_par_evenement.id_materiel,
+                materiel_par_evenement.nom_materiel
+              ])
+            })
+            //the_values = [[image.id, image.nom, image.commentaire, image.googleId, image.url, image.visualisation]]
             break
 
         }
@@ -252,6 +273,13 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           gsheet_range = `Utilisateur!A${the_detail_id}:${maxColonneUtilisateur}${the_detail_id}`
         } else {
           gsheet_range = `Utilisateur!A2:${maxColonneUtilisateur}`;
+        }
+        break
+      case "materiel_par_evenement":
+        if (isDetailAction) {
+          gsheet_range = `Matériel_par_Evenement!A${the_detail_id}:${maxColonneMaterielParEvenement}${the_detail_id}`
+        } else {
+          gsheet_range = `Matériel_par_Evenement!A2:${maxColonneMaterielParEvenement}`;
         }
         break
       default:
@@ -366,6 +394,42 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
               return res.status(200).json(utilisateurs)
             }
             break
+           case "materiel_par_evenement":
+             var materiel_par_evenement: Materiel_par_evenement = {id_evenement:"", id_materiel:"",};
+             var materiel_par_evenements: Materiel_par_evenement[] = [];
+             if (isDetailAction) {
+               response.data.values.map((oneRowDetail) => {
+                     idxCol=0
+                     materiel_par_evenement = {
+                        rowid: the_detail_id,
+                        rowid_evenement: oneRowDetail[idxCol++],
+                        id_evenement: oneRowDetail[idxCol++],
+                        nom_evenement: oneRowDetail[idxCol++],
+                        rowid_materiel: oneRowDetail[idxCol++],
+                        id_materiel: oneRowDetail[idxCol++],
+                        nom_materiel: oneRowDetail[idxCol++]
+                     }}
+               )
+               return res.status(200).json(materiel_par_evenement)
+             }
+             else {
+               var i=2
+               response.data.values.map((oneRowDetail) => {
+                     idxCol=0
+                     materiel_par_evenements.push({
+                        rowid: (i++).toString(),
+                        rowid_evenement: oneRowDetail[idxCol++],
+                        id_evenement: oneRowDetail[idxCol++],
+                        nom_evenement: oneRowDetail[idxCol++],
+                        rowid_materiel: oneRowDetail[idxCol++],
+                        id_materiel: oneRowDetail[idxCol++],
+                        nom_materiel: oneRowDetail[idxCol++]
+                     })
+                     idxCol=0
+               })
+               return res.status(200).json(materiel_par_evenements)
+             }
+             break
         }
       }
       else {

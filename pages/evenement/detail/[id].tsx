@@ -5,7 +5,7 @@ import Container from '@components/Container';
 import PacmanLoader from "react-spinners/PacmanLoader";
 
 import useSwr from 'swr'
-import type { Evenement } from '@interfaces'
+import type { Inventaire, Evenement } from '@interfaces'
 import { useRouter } from 'next/router';
 
 import Select from "react-select";
@@ -90,6 +90,21 @@ const Post = () => {
 
       if (unEvenement) {
         dispatch({type: 'evenement_choix', payload: unEvenement })
+
+        const response = await fetch(`/api/gsheet/materiel_par_evenement/liste`);
+        if (response.status == 200) {
+          const result = await response.json()
+          var maListeInventaire = []
+          result.forEach(async unLien => {
+
+            const responseInventaire = await fetch(`/api/gsheet/inventaire/detail/${unLien.rowid_materiel}`);
+            if (responseInventaire.status == 200 ) {
+              const unInventaire = await responseInventaire.json()
+              maListeInventaire.push(unInventaire)
+            }
+          })
+          dispatch({type: 'inventaire_set', payload: maListeInventaire })
+        }
       }
       else {
         dispatch({type: 'evenement_reset' })
@@ -142,9 +157,6 @@ const Post = () => {
          router.push('/evenement/detail/' + result.newid)
       }
     }
-    else {
-      alert(`Mise à jour : ${result.message}`)
-    }
   }
     const handleDeleteEvenement = async (session, unEvenement:Evenement) => {
       // Stop the form from submitting and refreshing the page.
@@ -177,7 +189,6 @@ const Post = () => {
       // Get the response data from server as JSON.
       // If server returns the name submitted, that means the form works.
       const result = await response.json()
-      alert(`Mise à jour : ${result.message}`)
       if (response.status == 200) {
          router.push('/evenement')
       }

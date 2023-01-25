@@ -42,3 +42,13 @@ export type Image = {
   url?: string
   visualisation?: string
 }
+
+export type Materiel_par_evenement = {
+  rowid?: string
+  rowid_evenement?: string
+  id_evenement?: string
+  nom_evenement?: string
+  rowid_materiel?: string
+  id_materiel: string
+  nom_materiel?: string
+}

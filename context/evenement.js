@@ -7,19 +7,31 @@ export const initialState = {
   listeInventaire: [],
 };
 
+
+
 export const AppReducer = (state, action) => {
    switch (action.type){
       case "evenement_choix": {
-         return {
-            ...state,
-            evenement: action.payload,
-         };
+        return {
+          ...state,
+          evenement: action.payload,
+        };
       }
       break
       case "evenement_reset": {
          return {
             ...state,
             evenement: undefined,
+         };
+      }
+      break
+
+      case "inventaire_set": {
+         // un nouvel objet ?
+         var newListeInventaire = action.payload
+         return {
+            ...state,
+            listeInventaire: newListeInventaire
          };
       }
       break

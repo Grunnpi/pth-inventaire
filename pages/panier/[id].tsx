@@ -5,7 +5,7 @@ import Container from '@components/Container';
 import PacmanLoader from "react-spinners/PacmanLoader";
 
 import useSwr from 'swr'
-import type { Evenement } from '@interfaces'
+import type { Evenement, Inventaire, Materiel_par_evenement } from '@interfaces'
 import { useRouter } from 'next/router';
 
 import Select from "react-select";
@@ -98,25 +98,27 @@ const Post = () => {
 
 
   // Handles the submit event on form submit.
-  const handleSubmit = async (event) => {
-    // Stop the form from submitting and refreshing the page.
-    event.preventDefault()
-
+  const handleSubmit = async () => {
     // Get data from the form.
-    const data = {
-      rowid: event.target.rowid.value,
-      id: event.target.id.value,
-      titre: event.target.titre.value,
-      type: selectedType ? selectedType : defaultType.value,
-      unite: selectedUnitee ? selectedUnitee : defaultUnite.value,
-      status: selectedStatus ? selectedStatus : defaultStatus.value,
-    }
+
+    var materiel_par_evenement_liste:Materiel_par_evenement[] = []
+    listeInventaire.forEach(async unInventaire => {
+      const materiel_par_evenement:Materiel_par_evenement = {
+        rowid_evenement: '=EQUIV(INDIRECT("B" & LIGNE());Evenement!A:A;0)',
+        id_evenement: evenement.id,
+        nom_evenement: '=RECHERCHEV(INDIRECT("B" & LIGNE());Evenement!A:E;2;FAUX)',
+        rowid_materiel: unInventaire.rowid,
+        id_materiel: unInventaire.id,
+        nom_materiel: '=RECHERCHEV(INDIRECT("E" & LIGNE());\'Matériel\'!A:M;4;FAUX)'
+      }
+      materiel_par_evenement_liste.push(materiel_par_evenement)
+    })
 
     // Send the data to the server in JSON format.
-    const JSONdata = JSON.stringify(data)
+    const JSONdata = JSON.stringify(materiel_par_evenement_liste)
 
     // API endpoint where we send form data.
-    const endpoint = event.target.rowid.value ==="nouveau" ? '/api/gsheet/evenement/nouveau' : '/api/gsheet/evenement/update'
+    const endpoint = '/api/gsheet/materiel_par_evenement/batch_insert'
 
     // Form the request for sending data to the server.
     const options = {
@@ -136,14 +138,7 @@ const Post = () => {
     // Get the response data from server as JSON.
     // If server returns the name submitted, that means the form works.
     const result = await response.json()
-    if (event.target.rowid.value ==="nouveau") {
-      if (response.status == 307) {
-         router.push('/evenement/detail/' + result.newid)
-      }
-    }
-    else {
-      alert(`Mise à jour : ${result.message}`)
-    }
+    alert(response.status)
   }
 
   if (!unEvenement) {
@@ -185,13 +180,14 @@ const Post = () => {
                   Ici on vérifie la liste de matos pour un évenement
                 </p>
                 <p className="text-gray-700 dark:text-gray-300">
-                  <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
+                  <div className="flex flex-col text-gray-700 dark:text-gray-300">
                     <div className="w-full flex flex-col text-gray-700 dark:text-gray-300">
                       <label htmlFor="titre">ligne</label>
                       <div>
                         <input  className="w-20 bg-gray-200 rounded-lg shadow border p-2" type="text" id="rowid" name="rowid" defaultValue={unEvenement.rowid}  readOnly/>
-                        <button className="w-20 rounded-lg border p-2" type="submit">💾</button>
+                        <button className="w-20 rounded-lg border p-2" title="Sauve la selection" onClick={() => handleSubmit()}>💾</button>
                         <button className="w-20 rounded-lg border p-2" title="Deselection !" onClick={() => handleChooseEvenement(session, null)}>❌</button>{' '}
+                        <a href={"/evenement/detail/" + unEvenement.rowid} className="w-20 rounded-lg border p-2" title="Edit" onClick={() => router.push("/evenement/detail/" + unEvenement.rowid)}><i class="bi bi-info-circle"></i></a>{' '}
                       </div>
                       <label htmlFor="titre">ID</label>
                       <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="id" name="id" defaultValue={unEvenement.id} readOnly />
@@ -214,7 +210,7 @@ const Post = () => {
                     <div>
                       <Select defaultValue={defaultStatus} options={Status} onChange={setHandleStatus}  />
                     </div>
-                  </form>
+                  </div>
 
                   <div className="grid w-full grid-cols-1 gap-4 my-2 mt-4 sm:grid-cols-2">
                     {listeInventaire.map((inventaire) => (

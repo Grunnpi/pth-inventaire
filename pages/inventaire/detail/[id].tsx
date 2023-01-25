@@ -219,7 +219,7 @@ const Post = () => {
                   {unInventaire.nom}
                 </h1>
                 <p className="text-gray-700 dark:text-gray-300">
-                  <a href={`/inventaire/`} >
+                  <a href="#" onClick={() => router.push('/inventaire')} >
                     ◀️ Revenir vers Inventaire
                   </a>
                 </p>

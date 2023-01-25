@@ -33,11 +33,13 @@ function NavItem({ href, text }) {
   );
 }
 
+
 export default function Container(props) {
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme, setTheme } = useTheme();
   const { state, dispatch } = useEvenementContext();
   const { evenement, listeInventaire } = state
+
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
 
 
   // After mounting, we have access to the theme
@@ -68,8 +70,8 @@ export default function Container(props) {
 
             },
             {
-              label: 'En effet',
-
+              label: 'En effet, allons y',
+              onClick: () => router.push('/evenement/')
             }
           ],
           closeOnEscape: true,
