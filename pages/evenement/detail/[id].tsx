@@ -104,6 +104,7 @@ const Post = () => {
             }
           })
           dispatch({type: 'inventaire_set', payload: maListeInventaire })
+          dispatch({type: 'panier_synchro_etat', payload: true })
         }
       }
       else {

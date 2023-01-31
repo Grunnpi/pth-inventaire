@@ -17,12 +17,14 @@ export default function InventairePostCard( {unInventaire} ) {
   const handleViewPanierAjout = (e) => {
      if ( evenement ) {
         dispatch({type: 'inventaire_ajout', payload: unInventaire })
+        dispatch({type: 'panier_synchro_etat', payload: false })
      }
      e.preventDefault();
   }
   const handleViewPanierRetire = (e) => {
      if ( evenement ) {
         dispatch({type: 'inventaire_retire', payload: unInventaire })
+        dispatch({type: 'panier_synchro_etat', payload: false })
      }
      e.preventDefault();
   }

@@ -4,6 +4,7 @@ const Context = createContext();
 
 export const initialState = {
   evenement: undefined,
+  panier_synchro: undefined,
   listeInventaire: [],
 };
 
@@ -11,6 +12,14 @@ export const initialState = {
 
 export const AppReducer = (state, action) => {
    switch (action.type){
+      case "panier_synchro_etat": {
+        return {
+          ...state,
+          panier_synchro: action.payload,
+        };
+      }
+      break
+
       case "evenement_choix": {
         return {
           ...state,
