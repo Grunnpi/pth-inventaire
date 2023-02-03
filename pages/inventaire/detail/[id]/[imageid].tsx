@@ -208,7 +208,7 @@ const Post = () => {
                 <div style={{position:"relative"}} className="w-full truncate place-content-center mt-2 sm:mt-0 rounded-lg shadow border p-2">
 
                   <form >
-                    <label for="files">Choisir une image (clickez ici)</label>
+                    <label htmlFor="files">Choisir une image (clickez ici)</label>
                     <input id="files" class="hidden" type="file" name="myImage" accept="image/*" onChange={uploadToClient} />
                   </form>
 
