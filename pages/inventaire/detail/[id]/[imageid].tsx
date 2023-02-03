@@ -12,8 +12,27 @@ import { useRouter } from 'next/router';
 
 import Zoom from "next-image-zoom";
 
-
 import { useState } from "react";
+
+
+const shimmer = (w: number, h: number) => `
+<svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="g">
+      <stop stop-color="#333" offset="20%" />
+      <stop stop-color="#222" offset="50%" />
+      <stop stop-color="#333" offset="70%" />
+    </linearGradient>
+  </defs>
+  <rect width="${w}" height="${h}" fill="#333" />
+  <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
+  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
+</svg>`
+
+const toBase64 = (str: string) =>
+  typeof window === 'undefined'
+    ? Buffer.from(str).toString('base64')
+    : window.btoa(str)
 
 const Post = () => {
   const { data: session } = useSession()
@@ -27,6 +46,7 @@ const Post = () => {
   const [url, setUrl] = useState("");
   const [file, setFile] = useState(null);
 
+  const [voirPleinEcran, setVoirPleinEcran] = useState(false);
 
   const [image, setImage] = useState(null);
   const [createObjectURL, setCreateObjectURL] = useState(null);
@@ -142,6 +162,9 @@ const Post = () => {
     </Container> )
   }
   else {
+      const the_url = createObjectURL ? createObjectURL : "/images/profile.jpg"
+      const the_alt = "nouvelle image"
+
       return (<Container
           title={`PTH [${post.nom}]`}
           description="A collection of code snippets – including serverless functions, Node.js scripts, and CSS tricks."
@@ -158,36 +181,48 @@ const Post = () => {
                   </a>
                 </p>
 
-                <img
-                  src={createObjectURL}
-                  height={30}
-                  width={40}
-                />
-                <form >
-                  <h4>Select Image</h4>
-                  <input type="file" name="myImage" accept="image/*" onChange={uploadToClient} />
+                <div style={{position:(voirPleinEcran ? "static":"relative")}} className="w-full max-h-full place-content-center mt-2 sm:mt-0 rounded-lg shadow border p-2">
+                    <a href="#" onClick={() => setVoirPleinEcran(!voirPleinEcran)}>
+                      {voirPleinEcran ?
+                        <Image
+                            src={the_url}
+                            alt={the_alt}
+                            placeholder="blur"
+                            blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(200, 200))}`}
+                            fill
+                            style={{objectFit:"contain"}}
+                        />
+                       :
+                        <Image
+                            src={the_url}
+                            alt={the_alt}
+                            placeholder="blur"
+                            blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(200, 200))}`}
+                            width={300}
+                            height={300}
+                            style={{objectFit:"contain"}}
+                        />
+                      }
+                    </a>
+                </div>
+                <div style={{position:"relative"}} className="w-full truncate place-content-center mt-2 sm:mt-0 rounded-lg shadow border p-2">
 
-                  <button
-                    className="btn btn-primary"
-                    type="submit"
-                    onClick={uploadToServer}
-                  ><i class="bi bi-cloud-arrow-up"></i> Upload</button>
-                </form>
-                Ici
-                <p className="text-gray-700 dark:text-gray-300">
-                  {image ? (image.name ? image.name  :"nullx") : "nulll"}
-                </p>
-                Et la
+                  <form >
+                    <label for="files">Choisir une image (clickez ici)</label>
+                    <input id="files" class="hidden" type="file" name="myImage" accept="image/*" onChange={uploadToClient} />
+                  </form>
 
-                <div className="md:w-48 mt-2 sm:mt-0">
-                  <Zoom
-                      alt={post.nom}
-                      height={30}
-                      width={40}
-                      src={post.image_visu}
-                      className="rounded-full"
-                      layout={"responsive"}
-                  />
+                  <span class="relative inline-flex rounded-md shadow-sm h-9 w-40">
+                    <button
+                      type="button"
+                      className="w-80 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center  hover:ring-2 ring-gray-300  transition-all"
+                      onClick={uploadToServer}
+                    ><i class="bi bi-cloud-arrow-up"></i> Upload</button>
+                    <span class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                      <span class="absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                    </span>
+                  </span>
                 </div>
               </div>
             </div>

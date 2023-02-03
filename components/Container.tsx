@@ -36,7 +36,7 @@ function NavItem({ href, text }) {
 
 export default function Container(props) {
   const { state, dispatch } = useEvenementContext();
-  const { evenement, listeInventaire } = state
+  const { evenement, listeInventaire, panier_synchro } = state
 
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
@@ -156,10 +156,16 @@ export default function Container(props) {
               onClick={(e) => handleViewPanier(e)}
             >{evenement ? "🛒" + listeInventaire.length : "?"}</button>
             { listeInventaire.length > 0 ?
-              <span class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-              </span>
+              panier_synchro ?
+                <span class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                  <span class="absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                </span>
+              :
+                <span class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                </span>
              :""}
           </span>
         </nav>

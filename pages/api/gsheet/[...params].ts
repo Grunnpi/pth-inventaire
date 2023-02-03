@@ -32,7 +32,7 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
   var the_type = params[0]
   var the_sous_type = params[1]
 
-  console.log('gsheet : ' + the_type + "/" + the_sous_type + "/" + method)
+//  console.log('gsheet : ' + the_type + "/" + the_sous_type + "/" + method)
 
   // basic error handling
   if (!session) {

@@ -22,6 +22,24 @@ import { useState, useEffect  } from "react";
 
 import { Familles, Types, Etats } from "@interfaces/constants.js"
 
+const shimmer = (w: number, h: number) => `
+<svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="g">
+      <stop stop-color="#333" offset="20%" />
+      <stop stop-color="#222" offset="50%" />
+      <stop stop-color="#333" offset="70%" />
+    </linearGradient>
+  </defs>
+  <rect width="${w}" height="${h}" fill="#333" />
+  <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
+  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
+</svg>`
+
+const toBase64 = (str: string) =>
+  typeof window === 'undefined'
+    ? Buffer.from(str).toString('base64')
+    : window.btoa(str)
 
 const Post = () => {
   const { data: session } = useSession()
@@ -34,6 +52,10 @@ const Post = () => {
 
   const [url, setUrl] = useState("");
   const [file, setFile] = useState(null);
+
+  const [voirImage, setVoirImage] = useState(false);
+  const [voirPleinEcran, setVoirPleinEcran] = useState(false);
+
 
   const [selectedFamille, setSelectedFamille] = useState(null);
   const setHandleFamille = (e) => {
@@ -122,9 +144,6 @@ const Post = () => {
            router.push('/inventaire/detail/' + result.newid)
         }
       }
-      else {
-        alert(`Mise à jour : ${result.message}`)
-      }
     }
 
     // Handles the submit event on form submit.
@@ -208,161 +227,219 @@ const Post = () => {
       }
       defaultEtat = Etats.find(c => c.value == unInventaire.etat)
 
-      return (<Container
-          title={`PTH [${unInventaire.nom}]`}
-          description="A collection of code snippets – including serverless functions, Node.js scripts, and CSS tricks."
-        >
+
+      if (voirImage) {
+        const the_url = unInventaire.image_url ? unInventaire.image_url : "/images/profile.jpg"
+        const the_alt = unInventaire.nom ? unInventaire.nom : "Pas d'image"
+
+        return(<Container title={`PTH [${unInventaire.nom}]`}>
           <article className="flex flex-col justify-center items-start max-w-2xl mx-auto mb-16 w-full">
             <div className="flex justify-between w-full mb-8">
               <div>
                 <h1 className="font-bold text-3xl md:text-5xl tracking-tight mb-4 text-black dark:text-white">
                   {unInventaire.nom}
                 </h1>
+                <p className="mb-4 text-gray-600 dark:text-gray-400">
+                  Clickez sur l'image pour revenir aux infos
+                </p>
+
+                <p className="text-gray-700 dark:text-gray-300">
+                  <a href="#" onClick={() => setVoirImage(false)} >
+                    <i class="bi bi-eye-slash"></i> Clickez sur l'image pour revenir aux infos
+                  </a>
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  <a href="#" onClick={() => router.push(`/inventaire/detail/${id}/nouveau`)} >
+                    <i class="bi bi-image"></i> Ajouter image
+                  </a>
+                </p>
                 <p className="text-gray-700 dark:text-gray-300">
                   <a href="#" onClick={() => router.push('/inventaire')} >
                     ◀️ Revenir vers Inventaire
                   </a>
                 </p>
 
-                <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
-
-                  <table className="flex flex-col w-full text-gray-700 dark:text-gray-300">
-                  <tbody>
-                    <tr>
-                    <td>
-                      <div className="w-full flex flex-col text-gray-700 dark:text-gray-300">
-                        <label htmlFor="titre">ligne</label>
-                        <div>
-                          <input  className="w-20 bg-gray-200 rounded-lg shadow border p-2" type="text" id="rowid" name="rowid" defaultValue={unInventaire.rowid}  readOnly/>
-                          <button className="w-20 rounded-lg border p-2" type="submit">💾</button>
-                          <button className="w-20 rounded-lg border p-2" onClick={() => handleDelete(session, unInventaire)}>🗑️</button>{' '}
-                        </div>
-                        <label htmlFor="titre">ID</label>
-                        <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="id" name="id" defaultValue={unInventaire.id}/>
-                      </div>
-                    </td>
-                    <td>
-                        <div className="w-full truncate min-h-full h-full place-content-center md:w-48 mt-2 sm:mt-0 rounded-lg shadow border p-2">
-                          {unInventaire.image_url ?
-                            <Zoom
-                                alt={unInventaire.nom}
-                                height={30}
-                                width={40}
-                                src={unInventaire.image_url}
-                                layout={"responsive"}
-                            />
-                            :
-                            <Link
-                              href={`/inventaire/detail/${id}/nouveau`}
-                            >
-                              <Image className=""
-                                src="/images/profile.jpg"
-                                alt="Pas d'image"
-                                width="120"
-                                height="120"
-                              />
-                            </Link>
-                          }
-                        </div>
-                    </td>
-                    </tr>
-                  </tbody>
-                  </table>
-                  <div className="flex flex-row w-full text-gray-700 dark:text-gray-300">
-                    <div className="w-1/2">
-                      <label htmlFor="type">Famille</label>
-                      <div>
-                        <Select menuShouldScrollIntoView={false} menuPlacement="bottom" isSearchable={false} className="w-full" defaultValue={defaultFamille} options={Familles} onChange={setHandleFamille}  />
-                      </div>
-                    </div>
-                    <div className="w-1/2">
-                      <label htmlFor="status">Etat</label>
-                      <div className="text-red-500 bg-gray-200 w-full rounded-lg">
-                        <Select menuShouldScrollIntoView={false} menuPlacement="bottom" isSearchable={false} className="w-full" defaultValue={defaultEtat} options={Etats} onChange={setHandleEtat}  />
-                      </div>
-                    </div>
-                  </div>
-
-                  <label htmlFor="type">Type</label>
-                  <div>
-                    <CreatableSelect isClearable  defaultValue={defaultTypeValue} options={Types} onChange={setHandleType}  />
-                  </div>
-                  <label htmlFor="titre">Nom</label>
-                  <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="nom" name="nom" defaultValue={unInventaire.nom} required />
-
-                  <label>Commentaire</label>
-                  <textarea
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    rows={3}
-                    placeholder=""
-                    name="commentaire"
-                    id="commentaire"
-                    value={commentaire}
-                    onChange={handleCommentaireChange}
-                    ></textarea>
-                  <label>Marquage</label>
-                  <textarea
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    rows={2}
-                    placeholder=""
-                    name="marquage"
-                    id="marquage"
-                    value={marquage}
-                    onChange={handleMarquageChange}
-                    ></textarea>
-                  <label htmlFor="titre">Localisation</label>
-                  <input
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="text"
-                    id="localisation"
-                    name="localisation"
-                    defaultValue={unInventaire.localisation}
-                  />
-                  <input
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="hidden"
-                    id="imageid"
-                    defaultValue={unInventaire.imageid}
-                  />
-                  <input
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="hidden"
-                    id="image_visu"
-                    defaultValue={unInventaire.image_visu}
-                  />
-                  <label htmlFor="titre">date_etat</label>
-                  <input
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="text"
-                    id="date_etat"
-                    defaultValue={unInventaire.date_etat}
-                  />
-                  <label htmlFor="titre">date_arrivee</label>
-                  <input
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="text"
-                    id="date_arrivee"
-                    defaultValue={unInventaire.date_arrivee}
-                  />
-                  <label htmlFor="titre">origine</label>
-                  <input
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="text"
-                    id="origine"
-                    defaultValue={unInventaire.origine}
-                  />
-                  <input
-                    className="bg-gray-200 w-full rounded-lg shadow border p-2"
-                    type="hidden"
-                    id="image_url"
-                    defaultValue={unInventaire.image_url}
-                  />
-                </form>
+                <div style={{position:(voirPleinEcran ? "static":"relative")}} className="w-full max-h-full place-content-center mt-2 sm:mt-0 rounded-lg shadow border p-2">
+                    <a href="#" onClick={() => setVoirPleinEcran(!voirPleinEcran)}>
+                      {voirPleinEcran ?
+                        <Image
+                            src={the_url}
+                            alt={the_alt}
+                            placeholder="blur"
+                            blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(200, 200))}`}
+                            fill
+                            style={{objectFit:"contain"}}
+                        />
+                       :
+                        <Image
+                            src={the_url}
+                            alt={the_alt}
+                            placeholder="blur"
+                            blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(200, 200))}`}
+                            width={300}
+                            height={300}
+                            style={{objectFit:"contain"}}
+                        />
+                      }
+                    </a>
+                </div>
               </div>
             </div>
+
             <div className="prose dark:prose-dark w-full">il n'y a plus rien en dessous</div>
           </article>
-        </Container> )
+        </Container>)
+      }
+      else {
+        const the_url = unInventaire.image_url ? unInventaire.image_url : "/images/profile.jpg"
+        const the_alt = unInventaire.nom ? unInventaire.nom : "Pas d'image"
+
+        return (<Container
+            title={`PTH [${unInventaire.nom}]`}
+            description="A collection of code snippets – including serverless functions, Node.js scripts, and CSS tricks."
+          >
+              <article className="flex flex-col justify-center items-start max-w-2xl mx-auto mb-16 w-full">
+                <div className="flex justify-between w-full mb-8">
+                  <div>
+                    <h1 className="font-bold text-3xl md:text-5xl tracking-tight mb-4 text-black dark:text-white">
+                      {unInventaire.nom}
+                    </h1>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      <a href="#" onClick={() => router.push('/inventaire')} >
+                        ◀️ Revenir vers Inventaire
+                      </a>
+                    </p>
+
+                    <form className="flex flex-col text-gray-700 dark:text-gray-300" onSubmit={handleSubmit}>
+                      <table className="flex flex-col w-full text-gray-700 dark:text-gray-300">
+                      <tbody>
+                        <tr>
+                        <td>
+                          <div className="w-full flex flex-col text-gray-700 dark:text-gray-300">
+                            <label htmlFor="titre">ligne</label>
+                            <div>
+                              <input  className="w-20 bg-gray-200 rounded-lg shadow border p-2" type="text" id="rowid" name="rowid" defaultValue={unInventaire.rowid}  readOnly/>
+                              <button className="w-20 rounded-lg border p-2" type="submit">💾</button>
+                              <button className="w-20 rounded-lg border p-2" onClick={() => handleDelete(session, unInventaire)}>🗑️</button>{' '}
+                            </div>
+                            <label htmlFor="titre">ID</label>
+                            <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="id" name="id" defaultValue={unInventaire.id}/>
+                          </div>
+                        </td>
+                        <td>
+                            <div style={{position:"relative"}} className="w-full truncate min-h-full h-full place-content-center md:w-48 mt-2 sm:mt-0 rounded-lg shadow border p-2">
+                              <a href="#" onClick={() => setVoirImage(true)}>
+                                <Image
+                                    src={the_url}
+                                    alt={the_alt}
+                                    height={120}
+                                    width={120}
+                                    layout={"responsive"}
+                                    placeholder="blur"
+                                    blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(150, 150))}`}
+                                />
+                              </a>
+                            </div>
+                        </td>
+                        </tr>
+                      </tbody>
+                      </table>
+                      <div className="flex flex-row w-full text-gray-700 dark:text-gray-300">
+                        <div className="w-1/2">
+                          <label htmlFor="type">Famille</label>
+                          <div>
+                            <Select menuShouldScrollIntoView={false} menuPlacement="bottom" isSearchable={false} className="w-full" defaultValue={defaultFamille} options={Familles} onChange={setHandleFamille}  />
+                          </div>
+                        </div>
+                        <div className="w-1/2">
+                          <label htmlFor="status">Etat</label>
+                          <div className="text-red-500 bg-gray-200 w-full rounded-lg">
+                            <Select menuShouldScrollIntoView={false} menuPlacement="bottom" isSearchable={false} className="w-full" defaultValue={defaultEtat} options={Etats} onChange={setHandleEtat}  />
+                          </div>
+                        </div>
+                      </div>
+
+                      <label htmlFor="type">Type</label>
+                      <div>
+                        <CreatableSelect isClearable  defaultValue={defaultTypeValue} options={Types} onChange={setHandleType}  />
+                      </div>
+                      <label htmlFor="titre">Nom</label>
+                      <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="nom" name="nom" defaultValue={unInventaire.nom} required />
+
+                      <label>Commentaire</label>
+                      <textarea
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        rows={3}
+                        placeholder=""
+                        name="commentaire"
+                        id="commentaire"
+                        value={commentaire}
+                        onChange={handleCommentaireChange}
+                        ></textarea>
+                      <label>Marquage</label>
+                      <textarea
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        rows={2}
+                        placeholder=""
+                        name="marquage"
+                        id="marquage"
+                        value={marquage}
+                        onChange={handleMarquageChange}
+                        ></textarea>
+                      <label htmlFor="titre">Localisation</label>
+                      <input
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        type="text"
+                        id="localisation"
+                        name="localisation"
+                        defaultValue={unInventaire.localisation}
+                      />
+                      <input
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        type="hidden"
+                        id="imageid"
+                        defaultValue={unInventaire.imageid}
+                      />
+                      <input
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        type="hidden"
+                        id="image_visu"
+                        defaultValue={unInventaire.image_visu}
+                      />
+                      <label htmlFor="titre">date_etat</label>
+                      <input
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        type="text"
+                        id="date_etat"
+                        defaultValue={unInventaire.date_etat}
+                      />
+                      <label htmlFor="titre">date_arrivee</label>
+                      <input
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        type="text"
+                        id="date_arrivee"
+                        defaultValue={unInventaire.date_arrivee}
+                      />
+                      <label htmlFor="titre">origine</label>
+                      <input
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        type="text"
+                        id="origine"
+                        defaultValue={unInventaire.origine}
+                      />
+                      <input
+                        className="bg-gray-200 w-full rounded-lg shadow border p-2"
+                        type="hidden"
+                        id="image_url"
+                        defaultValue={unInventaire.image_url}
+                      />
+                    </form>
+                  </div>
+                </div>
+                <div className="prose dark:prose-dark w-full">il n'y a plus rien en dessous</div>
+              </article>
+          </Container> )
+      }
   }
 }
 
