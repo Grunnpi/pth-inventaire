@@ -5,12 +5,14 @@ import { google } from 'googleapis';
 import { unstable_getServerSession } from "next-auth/next"
 import authOptions from "@api/auth/[...nextauth]"
 
+import { Mapping_API_Sheet } from "@interfaces/constants.js"
+
 const fs = require('fs');
 
-import type { Inventaire, Evenement, Utilisateur, Image, Materiel_par_evenement } from '@interfaces'
+import type { Inventaire, Evenement, Utilisateur, Image, Materiel_par_evenement, Requete_suppression } from '@interfaces'
 
 const maxColonneMateriel = "N"
-const maxColonneEvenement = "E"
+const maxColonneEvenement = "I"
 const maxColonneImage = "F"
 const maxColonneUtilisateur = "D"
 const maxColonneMaterielParEvenement = "L"
@@ -52,6 +54,9 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
+    /********************************************************************************************
+    ** NOUVEAU - retourne une entité vide par défaut avec id:nouveau
+    ********************************************************************************************/
     if (isDetailAction && the_detail_id === "nouveau") {
       switch (the_type) {
         case "inventaire":
@@ -74,6 +79,96 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
+    /********************************************************************************************
+    ** SUPPRIMER
+    ********************************************************************************************/
+    if (the_sous_type === "supprimer") {
+      if (method !== "POST") {
+        return res.status(500).json({ message: "Need POST for update" })
+      } else {
+        console.log("Youpi on fait un DELETE")
+        const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
+        const jwt = new google.auth.JWT(
+              process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+              undefined,
+              (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+              accessTypeForGSheet
+            );
+        const myGoogleSheet = google.sheets({ version: 'v4', auth: jwt });
+
+        const search = what => Mapping_API_Sheet.find(element => element.api_name === what);
+
+        const sheetName = search(the_type).sheet_name;
+        const requestFindSheetId = {
+            spreadsheetId: process.env.SHEET_ID,
+            ranges: [ sheetName ],
+            includeGridData: false
+        };
+
+        var the_sheetId = null
+        let myRes = await myGoogleSheet.spreadsheets.get(requestFindSheetId);
+
+
+        for (i = 0; i < myRes.data.sheets.length; i++) {
+          if (myRes.data.sheets[i].properties.title === sheetName) {
+            the_sheetId = myRes.data.sheets[i].properties.sheetId
+          }
+        }
+
+        if ( the_sheetId == null ) {
+          return res.status(500).json({ message: the_type + " delete pas possible, on trouve pas le sheetId pour xxx" })
+        }
+
+        const requeteSuppression:Requete_suppression = req.body
+        var batchUpdateRequest = {}
+        if ( requeteSuppression.type_suppression == "unique" ) {
+          batchUpdateRequest = {
+            "requests": [
+              {
+                "deleteDimension": {
+                  "range": {
+                    "sheetId": the_sheetId,
+                    "dimension": "ROWS",
+                    "startIndex": parseInt(requeteSuppression.rowid_unique) - 1,
+                    "endIndex": parseInt(requeteSuppression.rowid_unique)
+                  }
+                }
+              }
+            ]
+          }
+        }
+        else {
+          batchUpdateRequest = {
+            "requests": [
+              {
+                "deleteDimension": {
+                  "range": {
+                    "sheetId": the_sheetId,
+                    "dimension": "ROWS",
+                    "startIndex": parseInt(requeteSuppression.rowid_debut) - 1,
+                    "endIndex": parseInt(requeteSuppression.rowid_fin)
+                  }
+                }
+              }
+            ]
+          }
+        }
+
+
+        const request = {
+            // The spreadsheet to apply the updates to.
+            spreadsheetId: process.env.SHEET_ID,  // TODO: Update placeholder value.
+            resource: batchUpdateRequest,
+          };
+
+        const response = await myGoogleSheet.spreadsheets.batchUpdate(request)
+        return res.status(200).json({ message: the_type + " update ok" })
+      }
+    }
+
+    /********************************************************************************************
+    ** UPDATE
+    ********************************************************************************************/
     if (the_sous_type === "update") {
       if (method !== "POST") {
         return res.status(500).json({ message: "Need POST for update" })
@@ -86,7 +181,17 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
             const evenement:Evenement = req.body
             the_data = [
                 {
-                  values: [[evenement.id,  evenement.titre, evenement.type, evenement.unite, evenement.status]],
+                  values: [[
+                    evenement.id,
+                    evenement.titre,
+                    evenement.type,
+                    evenement.unite,
+                    evenement.status,
+                    evenement.nbFilles,
+                    evenement.nbGarcons,
+                    evenement.date_debut,
+                    evenement.date_fin
+                  ]],
                   range: `'Evenement'!A${evenement.rowid}:${maxColonneEvenement}${evenement.rowid}`
                 }
                 ]
@@ -138,48 +243,9 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
-    if (the_sous_type === "supprimer") {
-      if (method !== "POST") {
-        return res.status(500).json({ message: "Need POST for update" })
-      } else {
-        console.log("Youpi on fait un DELETE")
-        const evenement:Evenement = req.body
-
-        var batchUpdateRequest = {
-          "requests": [
-            {
-              "deleteDimension": {
-                "range": {
-                  "sheetId": 1915467561,
-                  "dimension": "ROWS",
-                  "startIndex": parseInt(evenement.rowid) - 1,
-                  "endIndex": parseInt(evenement.rowid)
-                }
-              }
-            }
-          ]
-        }
-
-        const accessTypeForGSheet = ['https://www.googleapis.com/auth/spreadsheets'];
-        const jwt = new google.auth.JWT(
-              process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-              undefined,
-              (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-              accessTypeForGSheet
-            );
-        const myGoogleSheet = google.sheets({ version: 'v4', auth: jwt });
-
-        const request = {
-            // The spreadsheet to apply the updates to.
-            spreadsheetId: process.env.SHEET_ID,  // TODO: Update placeholder value.
-            resource: batchUpdateRequest,
-          };
-
-        const response = await myGoogleSheet.spreadsheets.batchUpdate(request)
-        return res.status(200).json({ message: the_type + " update ok" })
-      }
-    }
-
+    /********************************************************************************************
+    ** CREATION NOUVEAU/BATCH_INSERT : creation d'une ou plusieurs lignes
+    ********************************************************************************************/
     if (the_sous_type === "nouveau" || the_sous_type === "batch_insert" ) {
       if (method !== "POST") {
         return res.status(500).json({ message: "Need POST for update" })
@@ -202,13 +268,49 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
           case "evenement":
             const evenement:Evenement = req.body
             the_range = "Evenement"
-//            the_range= `'Evenement'!A:${maxColonneEvenement}`
-            the_values = [[evenement.id, evenement.titre, evenement.type, evenement.unite, evenement.status]]
+            the_values = [[
+              evenement.id,
+              evenement.titre,
+              evenement.type,
+              evenement.unite,
+              evenement.status,
+              evenement.nbFilles,
+              evenement.nbGarcons,
+              evenement.date_debut,
+              evenement.date_fin
+            ]]
+            break
+          case "inventaire":
+            const inventaire:Inventaire = req.body
+            the_range = "Matériel"
+            the_values = [[
+              inventaire.id,
+              inventaire.famille,
+              inventaire.type,
+              inventaire.nom,
+              inventaire.imageid,
+              inventaire.image_visu,
+              inventaire.marquage,
+              inventaire.commentaire,
+              inventaire.localisation,
+              inventaire.etat,
+              inventaire.date_etat,
+              inventaire.date_arrivee,
+              inventaire.origine,
+              inventaire.image_url
+            ]]
             break
           case "image":
             const image:Image = req.body
             the_range ="Image"
-            the_values = [[image.id, image.nom, image.commentaire, image.googleId, image.url, image.visualisation]]
+            the_values = [[
+              image.id,
+              image.nom,
+              image.commentaire,
+              image.googleId,
+              image.url,
+              image.visualisation
+            ]]
             break
           case "materiel_par_evenement":
             const materiel_par_evenement_liste:Materiel_par_evenement[] = req.body
@@ -224,16 +326,13 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
                 materiel_par_evenement.nom_materiel
               ])
             })
-            //the_values = [[image.id, image.nom, image.commentaire, image.googleId, image.url, image.visualisation]]
             break
-
         }
-
 
         const request = {
           spreadsheetId: process.env.SHEET_ID,
           range: the_range,
-          valueInputOption: "USER_ENTERED",
+          valueInputOption: "USER_ENTERED", //RAW
           resource: {
                       values: the_values,
                     },
@@ -252,6 +351,9 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
       }
     }
 
+    /********************************************************************************************
+    ** GET - retourne une ligne en fonction du rowid ou bien la liste de toutes les entitées
+    ********************************************************************************************/
     var gsheet_range:string = ""
     switch (the_type) {
       case "inventaire":
@@ -364,16 +466,41 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
             var evenement: Evenement = {id:""};
             var evenements: Evenement[] = [];
             if (isDetailAction) {
+              idxCol=0
               response.data.values.map((oneRowDetail) => (
-                    evenement = {rowid: the_detail_id, id: oneRowDetail[0], titre: oneRowDetail[1], type: oneRowDetail[2], unite: oneRowDetail[3], status: oneRowDetail[4]})
-              )
+                    evenement = {
+                      rowid: the_detail_id,
+                      id: oneRowDetail[idxCol++],
+                      titre: oneRowDetail[idxCol++],
+                      type: oneRowDetail[idxCol++],
+                      unite: oneRowDetail[idxCol++],
+                      status: oneRowDetail[idxCol++],
+                      nbFilles: oneRowDetail[idxCol++],
+                      nbGarcons: oneRowDetail[idxCol++],
+                      date_debut: oneRowDetail[idxCol++],
+                      date_fin: oneRowDetail[idxCol++],
+                    }
+              ))
               return res.status(200).json(evenement)
             }
             else {
               var i=2
-              response.data.values.map((oneRowDetail) => (
-                    evenements.push({rowid: (i++).toString(), id: oneRowDetail[0], titre: oneRowDetail[1], type: oneRowDetail[2], unite: oneRowDetail[3], status: oneRowDetail[4]})
-              ))
+              idxCol=0
+              response.data.values.map((oneRowDetail) => {
+                    evenements.push({
+                      rowid: (i++).toString(),
+                      id: oneRowDetail[idxCol++],
+                      titre: oneRowDetail[idxCol++],
+                      type: oneRowDetail[idxCol++],
+                      unite: oneRowDetail[idxCol++],
+                      status: oneRowDetail[idxCol++],
+                      nbFilles: oneRowDetail[idxCol++],
+                      nbGarcons: oneRowDetail[idxCol++],
+                      date_debut: oneRowDetail[idxCol++],
+                      date_fin: oneRowDetail[idxCol++],
+                    });
+                    idxCol=0;
+              })
               return res.status(200).json(evenements)
             }
             break
@@ -382,14 +509,26 @@ export  default async function handler(req: NextApiRequest, res: NextApiResponse
             var utilisateurs: Utilisateur[] = [];
             if (isDetailAction) {
               response.data.values.map((oneRowDetail) => (
-                    utilisateur = {rowid: the_detail_id, id: oneRowDetail[0], nom: oneRowDetail[1], mot_de_passe: oneRowDetail[2], role: oneRowDetail[3]})
+                    utilisateur = {
+                      rowid: the_detail_id,
+                      id: oneRowDetail[0],
+                      nom: oneRowDetail[1],
+                      mot_de_passe: oneRowDetail[2],
+                      role: oneRowDetail[3]
+                    })
               )
               return res.status(200).json(utilisateur)
             }
             else {
               var i=2
               response.data.values.map((oneRowDetail) => (
-                    utilisateurs.push({rowid: (i++).toString(), id: oneRowDetail[0], nom: oneRowDetail[1], mot_de_passe: oneRowDetail[2], role: oneRowDetail[3]})
+                    utilisateurs.push({
+                      rowid: (i++).toString(),
+                      id: oneRowDetail[0],
+                      nom: oneRowDetail[1],
+                      mot_de_passe: oneRowDetail[2],
+                      role: oneRowDetail[3]
+                    })
               ))
               return res.status(200).json(utilisateurs)
             }

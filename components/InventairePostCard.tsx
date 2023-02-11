@@ -5,9 +5,11 @@ import cn from 'classnames';
 import Image from 'next/image'
 
 import { Familles, Etats } from "@interfaces/constants.js"
+import type { Inventaire } from '@interfaces'
+
+import ImageWithFallback from "@components/ImageWithFallback"
 
 import { useEvenementContext } from "@context/evenement";
-import type { Inventaire } from '@interfaces'
 
 //{ title, slug, gradient, the_api, url_image, the_famille, the_etat, the_type }
 export default function InventairePostCard( {unInventaire} ) {
@@ -34,7 +36,7 @@ export default function InventairePostCard( {unInventaire} ) {
       href={`/inventaire/detail/${unInventaire.rowid}`}
       className={cn(
         'transform hover:scale-[1.01] transition-all',
-        'rounded-xl w-full  bg-gradient-to-r p-1',
+        'rounded-xl w-full bg-gradient-to-r p-1',
         "from-[#0000FF] to-[#6EE7B7]"
       )}
     >
@@ -54,27 +56,31 @@ export default function InventairePostCard( {unInventaire} ) {
         </div>
         <div className="flex flex-row items-center text-gray-800 dark:text-gray-200">
           <div className="w-2/3 h-full truncate place-content-center mt-2 rounded-lg shadow border p-2">
-            <Image className=""
+            <ImageWithFallback className=""
               src={unInventaire.image_url}
+              fallbackSrc={"/images/profile.jpg"}
               alt="Pas d'image"
               width="60"
               height="60"
             />
           </div>
-          {listeInventaire.includes(unInventaire) ?
-            <button
-              aria-label="Ajout au chariot"
-              type="button"
-              className="w-16 h-9 fill-green-700 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center hover:ring-2 ring-gray-300  transition-all"
-              onClick={(e) => handleViewPanierRetire(e)}
-            ><i class="bi bi-cart-check text-green-500 fill-current"></i></button>
-            :
-            <button
-              aria-label="Ajout au chariot"
-              type="button"
-              className="w-16 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center hover:ring-2 ring-gray-300  transition-all"
-              onClick={(e) => handleViewPanierAjout(e)}
-            ><i class="bi bi-box-arrow-in-right text-blue-500 fill-current"></i><i class="bi bi-cart text-blue-500 fill-current"></i></button>
+          {evenement ?
+            listeInventaire.map((x)=>(x.id)).includes(unInventaire.id) ?
+              <button
+                aria-label="Ajout au chariot"
+                type="button"
+                className="w-16 h-9 fill-green-700 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center hover:ring-2 ring-gray-300  transition-all"
+                onClick={(e) => handleViewPanierRetire(e)}
+              ><i class="bi bi-cart-check text-green-500 fill-current"></i></button>
+              :
+              <button
+                aria-label="Ajout au chariot"
+                type="button"
+                className="w-16 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center hover:ring-2 ring-gray-300  transition-all"
+                onClick={(e) => handleViewPanierAjout(e)}
+              ><i class="bi bi-box-arrow-in-right text-blue-500 fill-current"></i><i class="bi bi-cart text-blue-500 fill-current"></i></button>
+          :
+            ""
           }
         </div>
       </div>

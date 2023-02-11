@@ -10,7 +10,7 @@ import PacmanLoader from "react-spinners/PacmanLoader";
 import { useSession, signIn, signOut } from "next-auth/react"
 
 import useSwr from 'swr'
-import type { Inventaire } from '@interfaces'
+import type { Inventaire, Requete_suppression } from '@interfaces'
 import { useRouter } from 'next/router';
 
 import Select from "react-select";
@@ -21,6 +21,11 @@ import Zoom from "next-image-zoom";
 import { useState, useEffect  } from "react";
 
 import { Familles, Types, Etats } from "@interfaces/constants.js"
+
+import { useEvenementContext } from "@context/evenement";
+
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 const shimmer = (w: number, h: number) => `
 <svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -43,6 +48,9 @@ const toBase64 = (str: string) =>
 
 const Post = () => {
   const { data: session } = useSession()
+
+  const { state, dispatch } = useEvenementContext();
+  const { evenement, listeInventaire } = state
 
   const fetcher = (url: string) => fetch(url).then((res) => res.json())
   const router = useRouter()
@@ -91,6 +99,22 @@ const Post = () => {
   var defaultTypeValue
   var defaultEtat = Etats.find(c => c.value == "Bon")
 
+  const handleViewPanierAjout = (e) => {
+     if ( evenement ) {
+        dispatch({type: 'inventaire_ajout', payload: unInventaire })
+        dispatch({type: 'panier_synchro_etat', payload: false })
+     }
+     e.preventDefault();
+  }
+  const handleViewPanierRetire = (e) => {
+     if ( evenement ) {
+        dispatch({type: 'inventaire_retire', payload: unInventaire })
+        dispatch({type: 'panier_synchro_etat', payload: false })
+     }
+     e.preventDefault();
+  }
+
+
   // Handles the submit event on form submit.
     const handleSubmit = async (event) => {
       // Stop the form from submitting and refreshing the page.
@@ -112,7 +136,7 @@ const Post = () => {
         date_etat: event.target.date_etat.value,
         date_arrivee: event.target.date_arrivee.value,
         origine: event.target.origine.value,
-        image_url: '=RECHERCHEV(INDIRECT("E" & LIGNE());Image!A:E;5;FAUX)'
+        image_url: '=SIERREUR(RECHERCHEV(INDIRECT("E" & LIGNE());Image!A:E;5;FAUX);"")'
       }
 
       // Send the data to the server in JSON format.
@@ -146,19 +170,52 @@ const Post = () => {
       }
     }
 
-    // Handles the submit event on form submit.
-      const handleDelete = async (session, unInventaire:Inventaire) => {
+    const handleDelete = async (session, unInventaire:Inventaire) => {
+        var retourOui = false
+        const options = {
+          title: "Sûr de vouloir supprimer cet objet ?!",
+          message: "un si bel objet....",
+          buttons: [
+            {
+              label: 'Oui quand même',
+              onClick: () => handleDeleteInventaire(session, unInventaire)
+            },
+            {
+              label: 'Oh ben non',
 
-        alert("Bloqué pour l'instant")
-        if (false) {
+            }
+          ],
+          closeOnEscape: true,
+          closeOnClickOutside: true,
+          keyCodeForClose: [8, 32],
+          willUnmount: () => {},
+          afterClose: () => {},
+          onClickOutside: () => {},
+          onKeypress: () => {},
+          onKeypressEscape: () => {},
+          overlayClassName: "overlay-custom-class-name",
+        };
+
+        confirmAlert(options);
+
+      }
+
+    // Handles the submit event on form submit.
+      const handleDeleteInventaire = async (session, unInventaire:Inventaire) => {
+
+        if (true) {
           // Stop the form from submitting and refreshing the page.
           event.preventDefault()
 
           // Get data from the form.
-          const data = unInventaire
+          // Get data from the form.
+          const requeteSuppression:Requete_suppression = {}
+          requeteSuppression.type_suppression = "unique"
+          requeteSuppression.rowid_unique = unInventaire.rowid
 
           // Send the data to the server in JSON format.
-          const JSONdata = JSON.stringify(data)
+          const JSONdata = JSON.stringify(requeteSuppression)
+
 
           // API endpoint where we send form data.
           const endpoint = '/api/gsheet/inventaire/supprimer'
@@ -181,7 +238,6 @@ const Post = () => {
           // Get the response data from server as JSON.
           // If server returns the name submitted, that means the form works.
           const result = await response.json()
-          alert(`Mise à jour : ${result.message}`)
           if (response.status == 200) {
              router.push('/inventaire')
           }
@@ -240,24 +296,29 @@ const Post = () => {
                   {unInventaire.nom}
                 </h1>
                 <p className="mb-4 text-gray-600 dark:text-gray-400">
-                  Clickez sur l'image pour revenir aux infos
+                  Clickez sur l'image zoom (et re-clickez pour revenir)
                 </p>
 
-                <p className="text-gray-700 dark:text-gray-300">
-                  <a href="#" onClick={() => setVoirImage(false)} >
-                    <i class="bi bi-eye-slash"></i> Clickez sur l'image pour revenir aux infos
-                  </a>
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  <a href="#" onClick={() => router.push(`/inventaire/detail/${id}/nouveau`)} >
-                    <i class="bi bi-image"></i> Ajouter image
-                  </a>
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  <a href="#" onClick={() => router.push('/inventaire')} >
-                    ◀️ Revenir vers Inventaire
-                  </a>
-                </p>
+                <div className="flex flex-row">
+                  <div className="text-gray-700 dark:text-gray-300 rounded-lg shadow border p-2">
+                    <a href="#" onClick={() => setVoirImage(false)} >
+                      <i class="bi bi-eye-slash"></i> Revoir infos
+                    </a>
+                  </div>
+
+                  <div className="text-gray-700 dark:text-gray-300 rounded-lg shadow border p-2">
+                    <a href="#" onClick={() => router.push(`/inventaire/detail/${id}/nouveau`)} >
+                      <i class="bi bi-image"></i> Ajouter image
+                    </a>
+                  </div>
+
+                  <div className="text-gray-700 dark:text-gray-300 rounded-lg shadow border p-2">
+                    <a href="#" onClick={() => router.push('/inventaire')} >
+                      ◀️ Vers Inventaire
+                    </a>
+                  </div>
+                </div>
+
 
                 <div style={{position:(voirPleinEcran ? "static":"relative")}} className="w-full max-h-full place-content-center mt-2 sm:mt-0 rounded-lg shadow border p-2">
                     <a href="#" onClick={() => setVoirPleinEcran(!voirPleinEcran)}>
@@ -321,8 +382,26 @@ const Post = () => {
                               <input  className="w-20 bg-gray-200 rounded-lg shadow border p-2" type="text" id="rowid" name="rowid" defaultValue={unInventaire.rowid}  readOnly/>
                               <button className="w-20 rounded-lg border p-2" type="submit">💾</button>
                               <button className="w-20 rounded-lg border p-2" onClick={() => handleDelete(session, unInventaire)}>🗑️</button>{' '}
+
+                              {listeInventaire.map((x)=>(x.id)).includes(unInventaire.id) ?
+                                <button
+                                  aria-label="Ajout au chariot"
+                                  type="button"
+                                  className="w-16 h-9 fill-green-700 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center hover:ring-2 ring-gray-300  transition-all"
+                                  onClick={(e) => handleViewPanierRetire(e)}
+                                ><i class="bi bi-cart-check text-green-500 fill-current"></i></button>
+                                :
+                                <button
+                                  aria-label="Ajout au chariot"
+                                  type="button"
+                                  className="w-16 h-9 bg-gray-200 rounded-lg dark:bg-gray-600 flex items-center justify-center hover:ring-2 ring-gray-300  transition-all"
+                                  onClick={(e) => handleViewPanierAjout(e)}
+                                ><i class="bi bi-box-arrow-in-right text-blue-500 fill-current"></i><i class="bi bi-cart text-blue-500 fill-current"></i></button>
+                              }
+
+
                             </div>
-                            <label htmlFor="titre">ID</label>
+                            <label htmlFor="titre">REF</label>
                             <input className="bg-gray-200 w-full rounded-lg shadow border p-2" type="text" id="id" name="id" defaultValue={unInventaire.id}/>
                           </div>
                         </td>

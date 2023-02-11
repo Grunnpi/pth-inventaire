@@ -23,6 +23,10 @@ export type Evenement = {
   type?: string
   unite?: string
   status?: string
+  nbFilles?: string
+  nbGarcons?: string
+  date_debut?: string
+  date_fin?: string
 }
 
 export type Utilisateur = {
@@ -51,4 +55,11 @@ export type Materiel_par_evenement = {
   rowid_materiel?: string
   id_materiel: string
   nom_materiel?: string
+}
+
+export type Requete_suppression = {
+  type_suppression?: string
+  rowid_unique?: string
+  rowid_debut?: string
+  rowid_fin?: string
 }

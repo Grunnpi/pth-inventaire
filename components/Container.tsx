@@ -57,9 +57,7 @@ export default function Container(props) {
 
   const handleViewPanier = (e) => {
      if ( evenement ) {
-        //alert(listeInventaire)
-        router.push('/panier/' + evenement.rowid)
-        //dispatch({type: 'inventaire_reset' })
+        router.push('/evenement/detail/' + evenement.rowid)
      } else {
         const options = {
           title: "Il faut d'abord selectionner un Evenement",
@@ -148,7 +146,7 @@ export default function Container(props) {
             )}
           </button>
 
-          <span class="relative inline-flex rounded-md shadow-sm h-9 w-9">
+          <span className="relative inline-flex rounded-md shadow-sm h-9 w-9">
             <button
               aria-label="Evenement list"
               type="button"
@@ -157,14 +155,14 @@ export default function Container(props) {
             >{evenement ? "🛒" + listeInventaire.length : "?"}</button>
             { listeInventaire.length > 0 ?
               panier_synchro ?
-                <span class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
-                  <span class="absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
                 </span>
               :
-                <span class="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
                 </span>
              :""}
           </span>

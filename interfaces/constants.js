@@ -20,3 +20,9 @@ export const Etats = [
   { value: "Mauvais", label: "😒 Mauvais" },
   { value: "HS", label: "💀 HS" },
 ];
+
+export const Mapping_API_Sheet = [
+  { api_name: "inventaire", sheet_name: "Matériel" },
+  { api_name: "evenement", sheet_name: "Evenement" },
+  { api_name: "materiel_par_evenement", sheet_name: "Matériel_par_Evenement" },
+]

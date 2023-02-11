@@ -86,6 +86,9 @@ export default function Home() {
                 Tout le matériel groupe. On peut filter par type (P8, Glacière, ...)
                 et on va bien voir quelles autres gadgets on peut ajouter ici
               </p>
+              <a href="/inventaire/detail/nouveau" >
+                <p> 📆 Créer un nouvel objet &rarr;</p>
+              </a>
               <div className="flex flex-col max-w-screen">
                  <div className="flex flex-col md:flex-row lg:flex-row xl:flex-row 2xl:flex-row">
                      <input
